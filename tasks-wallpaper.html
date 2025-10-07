@@ -1,19 +1,20 @@
 <!DOCTYPE html>
-<html lang="cs">
+<html lang="en">
 <head>
 <meta charset="utf-8"/>
 <meta name="viewport" content="width=device-width, initial-scale=1, maximum-scale=1, viewport-fit=cover"/>
 <title>Daily Planner → PNG</title>
 <style>
+  *,*::before,*::after{box-sizing:border-box}
   :root{
-    --bg:#ffffff; --fg:#0b0b0b; --muted:#8b8f98; --ring:#e9eaee;
-    --card:#f8f9fb; --blue:#2563eb; --blue2:#00c2ff;
+    --bg:#ffffff; --fg:#0b0b0b; --muted:#8b8f98; --ring:#e9eaee; --card:#f8f9fb;
+    --blue:#2563eb; --blue2:#1e40af; --red:#e11d48;
   }
   [data-theme="dark"]{
     --bg:#0c0d12; --fg:#f3f5f7; --muted:#a0a7b5; --ring:#191b22; --card:#11131a;
   }
   html,body{height:100%;margin:0;background:var(--bg);color:var(--fg);
-    font-family: ui-sans-serif, -apple-system,BlinkMacSystemFont,"Segoe UI",Inter,Roboto,Arial}
+    font-family: ui-sans-serif,-apple-system,BlinkMacSystemFont,"Segoe UI",Inter,Roboto,Arial}
   .app{min-height:100%;display:grid;grid-template-rows:auto 1fr auto}
 
   /* Header */
@@ -25,33 +26,26 @@
   }
   .brand{font-weight:900;letter-spacing:.2px}
   .chip{font-size:12px;color:var(--muted);padding:6px 10px;border:1px solid var(--ring);border-radius:999px}
-
-  /* Panels */
-  main{padding:14px;display:grid;gap:12px}
-  .panel{background:var(--card);border:1px solid var(--ring);border-radius:16px;padding:12px;display:grid;gap:10px}
-
-  /* Inputs row – no overlap */
-  .inputs{
-    display:grid;gap:8px;
-    grid-template-columns: 110px 110px 1fr 120px;
-    align-items:center;
+  .row{display:flex;align-items:center;gap:8px;flex-wrap:wrap}
+  select,input[type="number"]{
+    padding:10px;border-radius:10px;border:1px solid var(--ring);background:var(--bg);color:var(--fg)
   }
-  .inputs input[type="time"], .inputs input[type="text"]{
-    width:100%;padding:10px 12px;border-radius:12px;border:1px solid var(--ring);background:var(--bg);color:var(--fg);outline:none
+  .hidden{display:none!important}
+
+  /* Main */
+  main{padding:14px;display:grid;gap:12px}
+  .panel{background:var(--card);border:1px solid var(--ring);border-radius:16px;padding:12px;display:grid;gap:12px}
+
+  /* Inputs column */
+  .field{display:grid;gap:6px}
+  .label{font-size:12px;color:var(--muted);font-weight:700}
+  input[type="time"], input[type="text"], input[type="date"]{
+    width:100%;padding:12px;border-radius:12px;border:1px solid var(--ring);background:var(--bg);color:var(--fg);outline:none
   }
   .add-btn{
-    border:1px solid var(--ring);border-radius:12px;padding:10px 14px;font-weight:800;background:var(--bg);color:var(--fg);cursor:pointer
+    width:100%;padding:12px;border-radius:12px;border:1px solid var(--ring);
+    background:var(--bg);color:var(--fg);font-weight:800;cursor:pointer
   }
-  @media (max-width: 560px){
-    .inputs{ grid-template-columns: 1fr 1fr; }
-    .inputs input[type="text"]{ grid-column: 1 / -1; }
-    .add-btn{ grid-column: 1 / -1; }
-  }
-
-  /* Templates */
-  .templates{display:flex;gap:8px;flex-wrap:wrap}
-  .tpl{padding:8px 12px;border-radius:999px;border:1px dashed var(--ring);background:transparent;color:var(--muted);font-weight:800;cursor:pointer}
-  .tpl:hover{border-style:solid;color:var(--fg)}
 
   /* List */
   .list{display:grid;gap:8px}
@@ -61,320 +55,324 @@
   .txt{opacity:.95}
   .actions{display:flex;gap:6px}
   .btn{padding:8px 10px;border:1px solid var(--ring);border-radius:10px;background:var(--bg);color:var(--fg);font-weight:700;cursor:pointer}
-  .btn.blue{
-    border:none;color:#fff;background:linear-gradient(135deg,var(--blue),var(--blue2));
-    box-shadow:0 6px 18px rgba(37,99,235,.25)
-  }
 
-  /* Bottom bar */
+  /* Footer (sticky, full width, big buttons) */
   footer{
-    position:sticky;bottom:0;z-index:5;padding:10px 14px calc(10px + env(safe-area-inset-bottom));
-    display:flex;gap:8px;flex-wrap:wrap;justify-content:space-between;align-items:center;
-    border-top:1px solid var(--ring);background:linear-gradient(0deg,rgba(0,0,0,.03),transparent)
+    position:sticky;bottom:0;z-index:5;
+    background:var(--bg);
+    border-top:1px solid var(--ring);
   }
-  select, input[type="number"]{
-    padding:10px;border-radius:10px;border:1px solid var(--ring);background:var(--bg);color:var(--fg)
+  .footer-inner{
+    display:grid;grid-template-columns:1fr 1fr;gap:10px;
+    padding:12px 14px calc(12px + env(safe-area-inset-bottom));
   }
-  .hidden{display:none !important}
+  .cta{
+    height:56px;border:none;border-radius:14px;font-weight:900;color:#fff;cursor:pointer;
+    font-size:16px;letter-spacing:.2px
+  }
+  .cta.blue{background:var(--blue)}
+  .cta.red{background:var(--red)}
+  .note{padding:8px 14px;color:var(--muted);font-size:12px;text-align:center}
+
+  /* Utilities */
+  @media (min-width: 720px){
+    .inputs-grid{grid-template-columns: 1fr 1fr;gap:12px}
+  }
 </style>
 </head>
 <body data-theme="light">
 <div class="app">
+  <!-- Header with device selector -->
   <header>
-    <div style="display:flex;align-items:center;gap:10px">
+    <div class="row">
       <div class="brand">Daily Planner</div>
-      <div class="chip" id="msg">Připraveno</div>
+      <div class="chip" id="msg">Ready</div>
     </div>
-    <div style="display:flex;gap:8px">
-      <button class="btn" id="themeBtn">🌓 Téma</button>
+    <div class="row">
+      <label for="device" class="label" style="margin-right:4px">Phone</label>
+      <select id="device">
+        <option value="1290x2796">iPhone 15/14 Pro Max (1290×2796)</option>
+        <option value="1179x2556">iPhone 15/14 Pro (1179×2556)</option>
+        <option value="1284x2778">iPhone 12/13 Pro Max, 14+ (1284×2778)</option>
+        <option value="1170x2532">iPhone 12/13/14/15 (1170×2532)</option>
+        <option value="1080x2340">1080×2340 (general)</option>
+        <option value="custom">Custom…</option>
+      </select>
+      <input id="w" class="hidden" type="number" min="640" step="1" placeholder="Width (px)"/>
+      <input id="h" class="hidden" type="number" min="1136" step="1" placeholder="Height (px)"/>
+      <button class="btn" id="themeBtn">🌓 Theme</button>
     </div>
   </header>
 
   <main>
-    <!-- Quick add -->
+    <!-- Inputs stacked vertically -->
     <section class="panel">
-      <div class="inputs">
-        <input type="time" id="from" value="08:00" aria-label="Od">
-        <input type="time" id="to" value="08:30" aria-label="Do">
-        <input type="text" id="what" placeholder="Co (např. Deep Work, Workout, Call…)" aria-label="Co">
-        <button class="add-btn" id="addBtn">＋ Přidat</button>
-      </div>
-      <div class="templates">
-        <button class="tpl" data-tpl="workday">Pracovní den</button>
-        <button class="tpl" data-tpl="maker">Maker ráno</button>
-        <button class="tpl" data-tpl="wellness">Wellness večer</button>
-        <button class="tpl" data-tpl="clear">Vymazat plán</button>
+      <div class="inputs-grid" style="display:grid">
+        <div class="field">
+          <div class="label">From</div>
+          <input type="time" id="from" value="08:00" aria-label="From">
+        </div>
+        <div class="field">
+          <div class="label">Until</div>
+          <input type="time" id="to" value="08:30" aria-label="Until">
+        </div>
+        <div class="field">
+          <div class="label">Plan</div>
+          <input type="text" id="what" maxlength="120" placeholder="e.g., Deep Work, Workout, Client Call…" aria-label="Plan">
+        </div>
+        <button class="add-btn" id="addBtn">Add block</button>
       </div>
     </section>
 
-    <!-- Seznam bloků -->
+    <!-- Schedule -->
     <section class="panel">
-      <div style="display:flex;justify-content:space-between;align-items:center;gap:8px;flex-wrap:wrap">
-        <div class="chip">Dnešní plán</div>
-        <div style="display:flex;gap:8px;align-items:center">
-          <input type="date" id="dateInput"/>
-          <button class="btn" id="sortBtn">↕ Seřadit</button>
+      <div class="row" style="justify-content:space-between">
+        <div class="label" style="font-size:13px">Today’s schedule</div>
+        <div class="row">
+          <div class="field" style="min-width:180px">
+            <div class="label">Date</div>
+            <input type="date" id="dateInput">
+          </div>
+          <button class="btn" id="sortBtn" style="height:44px;align-self:end">Sort</button>
         </div>
       </div>
       <div class="list" id="list"></div>
     </section>
   </main>
 
+  <!-- Sticky footer with big buttons -->
   <footer>
-    <div style="display:flex;gap:8px;align-items:center;flex-wrap:wrap">
-      <label>Telefon</label>
-      <select id="device">
-        <option value="1290x2796">iPhone 15/14 Pro Max (1290×2796)</option>
-        <option value="1179x2556">iPhone 15/14 Pro (1179×2556)</option>
-        <option value="1284x2778">iPhone 12/13 Pro Max, 14+ (1284×2778)</option>
-        <option value="1170x2532">iPhone 12/13/14/15 (1170×2532)</option>
-        <option value="1080x2340">iPhone 12/13 mini / obecné (1080×2340)</option>
-        <option value="custom">Vlastní…</option>
-      </select>
-      <input id="w" class="hidden" type="number" min="640" step="1" placeholder="Šířka (px)"/>
-      <input id="h" class="hidden" type="number" min="1136" step="1" placeholder="Výška (px)"/>
+    <div class="footer-inner">
+      <button class="cta blue" id="exportBtn">Export PNG</button>
+      <button class="cta red" id="clearAllBtn">Delete ALL</button>
     </div>
-    <div style="display:flex;gap:8px;align-items:center">
-      <button class="btn blue" id="exportBtn">⬇️ Export PNG</button>
-      <button class="btn" id="clearAllBtn">🧹 Vymazat vše</button>
-    </div>
+    <div class="note">Tip: On iPhone, the Export button opens the Share Sheet — tap <b>Save Image</b> to save into Photos.</div>
   </footer>
 </div>
 
 <script>
 (()=> {
   const el = id => document.getElementById(id);
-  const msg = t => { el('msg').textContent = t; setTimeout(()=>el('msg').textContent='Připraveno', 1800); };
+  const msg = t => { el('msg').textContent = t; setTimeout(()=>el('msg').textContent='Ready', 1600); };
   const pad = n => String(n).padStart(2,'0');
   const toMin = hhmm => { const [h,m] = hhmm.split(':').map(Number); return h*60+m; };
-  const toHHMM = m  => pad(Math.floor(m/60))+':'+pad(m%60);
 
   let items = []; // {id, from, to, what}
-
-  // THEME
   let theme = (localStorage.getItem('dp.theme') || 'light');
   document.body.setAttribute('data-theme', theme);
+
+  // Initialize date input to today
+  el('dateInput').value = new Date().toISOString().slice(0,10);
+
+  // Theme toggle
   el('themeBtn').addEventListener('click', ()=>{
     theme = (theme==='dark') ? 'light' : 'dark';
     document.body.setAttribute('data-theme', theme);
     localStorage.setItem('dp.theme', theme);
   });
 
-  // DATE
-  el('dateInput').value = new Date().toISOString().slice(0,10);
-
-  // ADD
-  el('addBtn').addEventListener('click', ()=>{
-    const f = el('from').value, t = el('to').value, w = el('what').value.trim();
-    if(!f || !t || !w) return msg('Vyplň čas i text');
-    if(toMin(t) <= toMin(f)) return msg('„Do“ musí být později než „Od“');
-    items.push({ id: uid(), from: f, to: t, what: w });
-    sortItems(); renderList(); el('what').value='';
-  });
-
-  // TEMPLATES
-  document.querySelectorAll('.tpl').forEach(b=>{
-    b.addEventListener('click', ()=>{
-      const id = b.dataset.tpl;
-      if(id==='clear'){ items=[]; renderList(); return; }
-      items = template(id); sortItems(); renderList();
-    });
-  });
-
-  // SORT
-  el('sortBtn').addEventListener('click', ()=>{ sortItems(); renderList(); });
-
-  // CLEAR ALL
-  el('clearAllBtn').addEventListener('click', ()=>{
-    if(confirm('Vymazat celý plán?')){ items=[]; renderList(); }
-  });
-
-  // DEVICE select
+  // Device select: show custom width/height inputs
   el('device').addEventListener('change', ()=>{
     const v = el('device').value;
-    const custom = (v==='custom');
+    const custom = (v === 'custom');
     el('w').classList.toggle('hidden', !custom);
     el('h').classList.toggle('hidden', !custom);
   });
 
-  // EXPORT
-  el('exportBtn').addEventListener('click', async ()=>{
-    if(items.length===0){ msg('Přidej aspoň jeden blok'); return; }
-    const size = getSize();
-    const blob = await renderPNG(size.w, size.h);
-    const name = `daily_${el('dateInput').value}_${size.w}x${size.h}.png`;
-    downloadBlob(blob, name);
-    msg('Export hotov ✔️');
+  // Add block
+  el('addBtn').addEventListener('click', ()=>{
+    const f = el('from').value, t = el('to').value, w = el('what').value.trim();
+    if (!f || !t || !w) {
+      return msg('Fill time & plan');
+    }
+    if (toMin(t) <= toMin(f)) {
+      return msg('“Until” must be later than “From”');
+    }
+    items.push({ id: uid(), from: f, to: t, what: w });
+    sortItems();
+    renderList();
+    el('what').value = '';
   });
 
-  // RENDER LIST
+  // Sort button
+  el('sortBtn').addEventListener('click', ()=>{
+    sortItems();
+    renderList();
+  });
+
+  // Clear all
+  el('clearAllBtn').addEventListener('click', ()=>{
+    if (items.length && confirm('Delete the whole schedule?')) {
+      items = [];
+      renderList();
+    }
+  });
+
+  // Export as PNG
+  el('exportBtn').addEventListener('click', async ()=>{
+    if (items.length === 0) return msg('Add at least one block');
+    const { w, h } = getSize();
+    const blob = await renderPNG(w, h);
+    const filename = `daily_${el('dateInput').value}_${w}x${h}.png`;
+    const file = new File([blob], filename, { type: 'image/png' });
+
+    try {
+      if (navigator.canShare && navigator.canShare({ files:[file] })) {
+        await navigator.share({ files:[file], title:'Daily Plan', text:'Daily plan wallpaper' });
+      } else {
+        downloadBlob(blob, filename);
+      }
+      msg('Exported');
+    } catch(e) {
+      console.warn(e);
+      downloadBlob(blob, filename);
+      msg('Downloaded');
+    }
+  });
+
+  // Render list on screen
   function renderList(){
-    const wrap = el('list'); wrap.innerHTML='';
-    if(!items.length){
-      wrap.innerHTML = `<div class="chip" style="border-style:dashed">Žádné bloky. Přidej nahoře nebo použij šablonu.</div>`;
+    const wrap = el('list');
+    wrap.innerHTML = '';
+    if (!items.length) {
+      wrap.innerHTML = `<div class="chip" style="border-style:dashed">No blocks yet — add above.</div>`;
       return;
     }
-    items.forEach(it=>{
-      const row = document.createElement('div'); row.className='item';
-      const time = document.createElement('div'); time.className='time'; time.textContent = `${it.from}–${it.to}`;
-      const txt = document.createElement('div'); txt.className='txt'; txt.textContent = it.what;
-      const actions = document.createElement('div'); actions.className='actions';
-      const edit = button('✎', ()=>editItem(it.id));
-      const del  = button('×', ()=>{ items = items.filter(x=>x.id!==it.id); renderList(); });
+    items.forEach(it => {
+      const row = document.createElement('div'); row.className = 'item';
+      const time = document.createElement('div'); time.className = 'time'; time.textContent = `${it.from}–${it.to}`;
+      const txt = document.createElement('div'); txt.className = 'txt'; txt.textContent = it.what;
+      const actions = document.createElement('div'); actions.className = 'actions';
+      const edit = button('Edit', ()=>editItem(it.id));
+      const del = button('Delete', ()=>{ items = items.filter(x => x.id !== it.id); renderList(); });
       actions.append(edit, del);
-      row.append(time, txt, actions); wrap.appendChild(row);
+      row.append(time, txt, actions);
+      wrap.appendChild(row);
     });
   }
-  function button(label, on){ const b=document.createElement('button'); b.className='btn'; b.textContent=label; b.addEventListener('click', on); return b; }
-  function editItem(id){
-    const it = items.find(x=>x.id===id); if(!it) return;
-    const f = prompt('Od (HH:MM):', it.from); if(!f) return;
-    const t = prompt('Do (HH:MM):', it.to); if(!t) return;
-    const w = prompt('Co:', it.what); if(!w) return;
-    if(toMin(t) <= toMin(f)) return msg('„Do“ musí být později než „Od“');
-    it.from=f; it.to=t; it.what=w.trim(); sortItems(); renderList();
-  }
-  function sortItems(){ items.sort((a,b)=> toMin(a.from) - toMin(b.from) || toMin(a.to)-toMin(b.to)); }
-  function uid(){ return Math.random().toString(36).slice(2,9); }
 
-  // PRESETS
-  function template(id){
-    const B=(f,t,w)=>({id:uid(),from:f,to:t,what:w});
-    if(id==='workday') return [
-      B('07:30','08:00','Ranní rutina'),
-      B('08:00','10:30','Deep Work blok'),
-      B('10:30','11:00','E-maily & administrace'),
-      B('11:00','12:00','Schůzky / Calls'),
-      B('12:00','13:00','Oběd & procházka'),
-      B('13:00','15:00','Projekt A — fokus'),
-      B('15:00','15:30','Káva & reset'),
-      B('15:30','17:00','Projekt B — dodávky'),
-      B('17:30','18:30','Workout / běh'),
-      B('19:00','21:00','Volno / rodina / čtení')
-    ];
-    if(id==='maker') return [
-      B('06:30','07:15','Lehký strečink & plán dne'),
-      B('07:15','09:45','Tvorba / psaní / kód'),
-      B('09:45','10:15','Pauza & e-maily'),
-      B('10:15','12:00','Tvorba pokračování')
-    ];
-    if(id==='wellness') return [
-      B('18:00','18:45','Lehký trénink'),
-      B('18:45','19:15','Sprcha / večeře'),
-      B('19:30','20:00','Procházka'),
-      B('20:00','21:00','Čtení / off-screen')
-    ];
-    return [];
+  function button(label, on) {
+    const b = document.createElement('button');
+    b.className = 'btn';
+    b.textContent = label;
+    b.addEventListener('click', on);
+    return b;
   }
 
-  // CANVAS RENDER — left-aligned, vertically centered block
-  async function renderPNG(W, H){
-    // Colors
-    const BG = (theme==='dark') ? '#0c0d12' : '#ffffff';
-    const FG = (theme==='dark') ? '#f3f5f7' : '#0b0b0b';
-    const MUTED = (theme==='dark') ? '#a0a7b5' : '#8b8f98';
-
-    // Base sizes (will auto-scale if content is long)
-    let titleSize = Math.round(W*0.085);
-    let lineSize  = Math.round(W*0.038);
-    let gap       = Math.round(W*0.018);
-    let lineH     = Math.round(W*0.048);
-    const PAD_L   = Math.round(W*0.07);      // left offset
-    const PAD_R   = Math.round(W*0.06);      // right padding
-
-    const cvs = document.createElement('canvas'); cvs.width=W; cvs.height=H;
-    const ctx = cvs.getContext('2d');
-
-    // Measure total height to center vertically
-    function measureTotal(){
-      ctx.font = `900 ${titleSize}px Inter, -apple-system, Segoe UI, Roboto, Arial`;
-      const hTitle = titleSize;
-      ctx.font = `500 ${Math.round(W*0.03)}px Inter, -apple-system, Segoe UI, Roboto, Arial`;
-      const hDate = Math.round(W*0.05);
-      const linesH = items.length * lineH + Math.max(0, items.length-1) * (gap - (lineH - lineSize)); // visual spacing
-      return hTitle + Math.round(W*0.02) + hDate + Math.round(W*0.04) + linesH;
+  function editItem(id) {
+    const it = items.find(x => x.id === id);
+    if (!it) return;
+    const f = prompt('From (HH:MM):', it.from);
+    if (!f) return;
+    const t = prompt('Until (HH:MM):', it.to);
+    if (!t) return;
+    const w = prompt('Plan:', it.what);
+    if (!w) return;
+    if (toMin(t) <= toMin(f)) {
+      return msg('“Until” must be later than “From”');
     }
+    it.from = f;
+    it.to = t;
+    it.what = w.trim();
+    sortItems();
+    renderList();
+  }
 
-    // If overflow, scale down
-    let total = measureTotal();
-    if(total > H * 0.88){
-      const s = (H*0.88) / total;
-      titleSize = Math.max(28, Math.floor(titleSize*s));
-      lineSize  = Math.max(16, Math.floor(lineSize*s));
-      lineH     = Math.max(lineSize+6, Math.floor(lineH*s));
-      gap       = Math.floor(gap*s);
-      total     = measureTotal();
-    }
-
-    // Draw background
-    ctx.fillStyle = BG; ctx.fillRect(0,0,W,H);
-
-    // Start Y to vertical center
-    let Y = Math.round((H - total)/2);
-
-    // Title
-    ctx.fillStyle = FG;
-    ctx.font = `900 ${titleSize}px Inter, -apple-system, Segoe UI, Roboto, Arial`;
-    ctx.textBaseline = 'top';
-    ctx.fillText('DAILY PLAN', PAD_L, Y);
-    Y += titleSize + Math.round(W*0.02);
-
-    // Date
-    ctx.fillStyle = MUTED;
-    ctx.font = `500 ${Math.round(W*0.03)}px Inter, -apple-system, Segoe UI, Roboto, Arial`;
-    const dateText = formatCzechDate(new Date(el('dateInput').value));
-    ctx.fillText(dateText, PAD_L, Y);
-    Y += Math.round(W*0.04);
-
-    // Lines (one line: "HH:MM–HH:MM  text")
-    const maxLineWidth = W - PAD_L - PAD_R;
-    ctx.fillStyle = FG;
-    ctx.font = `600 ${lineSize}px Inter, -apple-system, Segoe UI, Roboto, Arial`;
-
-    items.forEach(it=>{
-      const line = `${it.from}–${it.to}  ${it.what}`;
-      const final = ellipsize(ctx, line, maxLineWidth);
-      ctx.fillText(final, PAD_L, Y);
-      Y += lineH;
+  function sortItems(){
+    items.sort((a, b) => {
+      const da = toMin(a.from), db = toMin(b.from);
+      if (da !== db) return da - db;
+      return toMin(a.to) - toMin(b.to);
     });
-
-    return await new Promise(res => cvs.toBlob(res, 'image/png', 1));
   }
 
-  // Utilities
-  function ellipsize(ctx, text, maxW){
-    if(ctx.measureText(text).width <= maxW) return text;
-    let lo = 0, hi = text.length, mid, fit = '…';
-    while(lo <= hi){
-      mid = (lo+hi)>>1;
-      const test = text.slice(0, mid) + '…';
-      if(ctx.measureText(test).width <= maxW){ fit = test; lo = mid+1; } else hi = mid-1;
-    }
-    return fit;
+  function uid(){
+    return Math.random().toString(36).slice(2,9);
   }
+
   function getSize(){
-    const v = el('device').value;
-    if(v==='custom'){
-      const w = Math.max(640, +el('w').value||1290);
-      const h = Math.max(1136, +el('h').value||2796);
-      return { w, h };
+    const dv = el('device').value;
+    if (dv === 'custom') {
+      const w = parseInt(el('w').value, 10);
+      const h = parseInt(el('h').value, 10);
+      return { w: w || 1080, h: h || 2340 };
+    } else {
+      const [ww, hh] = dv.split('x').map(Number);
+      return { w: ww, h: hh };
     }
-    const [w,h] = v.split('x').map(Number);
-    return { w, h };
   }
+
   function downloadBlob(blob, filename){
-    const a=document.createElement('a');
+    const a = document.createElement('a');
     a.href = URL.createObjectURL(blob);
     a.download = filename;
-    document.body.appendChild(a); a.click();
-    setTimeout(()=>{ URL.revokeObjectURL(a.href); a.remove(); },0);
+    document.body.appendChild(a);
+    a.click();
+    document.body.removeChild(a);
   }
-  function formatCzechDate(d){
-    const WD=['Neděle','Pondělí','Úterý','Středa','Čtvrtek','Pátek','Sobota'][d.getDay()];
-    const M=['ledna','února','března','dubna','května','června','července','srpna','září','října','listopadu','prosince'][d.getMonth()];
-    return `${WD}, ${d.getDate()}. ${M}`;
+
+  async function renderPNG(W, H){
+    const cvs = document.createElement('canvas');
+    cvs.width = W;
+    cvs.height = H;
+    const ctx = cvs.getContext('2d');
+
+    const BG = (theme === 'dark') ? '#0c0d12' : '#ffffff';
+    const FG = (theme === 'dark') ? '#f3f5f7' : '#0b0b0b';
+    const MUTED = (theme === 'dark') ? '#a0a7b5' : '#8b8f98';
+    const CARD = (theme === 'dark') ? '#11131a' : '#f8f9fb';
+    const RING = (theme === 'dark') ? '#191b22' : '#e9eaee';
+
+    // Fill background
+    ctx.fillStyle = BG;
+    ctx.fillRect(0, 0, W, H);
+
+    // Some margins
+    const margin = 60;
+    const contentWidth = W - margin * 2;
+    const yStart = margin;
+
+    // Title: date
+    ctx.fillStyle = FG;
+    ctx.font = 'bold 48px sans-serif';
+    ctx.textAlign = 'center';
+    const dateStr = el('dateInput').value;
+    ctx.fillText(dateStr, W / 2, yStart + 48);
+
+    // Draw each block
+    const totalMin = 24 * 60;
+    const usableHeight = H - yStart - margin;
+    items.forEach(it => {
+      const fromMin = toMin(it.from);
+      const toMin_ = toMin(it.to);
+      const y0 = yStart + (fromMin / totalMin) * usableHeight;
+      const y1 = yStart + (toMin_ / totalMin) * usableHeight;
+      const blockHeight = Math.max(24, y1 - y0);
+
+      // Block background
+      ctx.fillStyle = CARD;
+      ctx.strokeStyle = RING;
+      const x0 = margin;
+      const x1 = W - margin;
+      ctx.fillRect(x0, y0, contentWidth, blockHeight);
+      ctx.strokeRect(x0, y0, contentWidth, blockHeight);
+
+      // Text inside block
+      ctx.fillStyle = FG;
+      ctx.textAlign = 'left';
+      ctx.font = '24px sans-serif';
+      const textX = x0 + 20;
+      const textY = y0 + 36;
+      ctx.fillText(`${it.from}–${it.to}`, textX, textY);
+      ctx.fillText(it.what, textX, textY + 30);
+    });
+
+    return new Promise(resolve => {
+      cvs.toBlob(blob => resolve(blob), 'image/png');
+    });
   }
+
+  // Initial render
+  renderList();
 })();
 </script>
-</body>
-</html>
