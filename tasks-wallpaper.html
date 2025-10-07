@@ -1,0 +1,462 @@
+<!DOCTYPE html>
+<html lang="cs">
+<head>
+<meta charset="utf-8"/>
+<meta name="viewport" content="width=device-width, initial-scale=1, maximum-scale=1, viewport-fit=cover"/>
+<title>Daily Tasks → iPhone Tapeta</title>
+<style>
+  :root{
+    --bg:#ffffff; --fg:#0a0a0a; --muted:#7a7a7a; --accent:#111; --ring:#e8e8e8;
+    --card:#f6f6f6; --ok:#12b886; --warn:#f08c00;
+  }
+  [data-theme="dark"]{
+    --bg:#0b0b0b; --fg:#f6f6f6; --muted:#a8a8a8; --accent:#fafafa; --ring:#1f1f1f;
+    --card:#141414; --ok:#37ef9d; --warn:#ffb000;
+  }
+  html,body{height:100%;margin:0;background:var(--bg);color:var(--fg);font-family:-apple-system,BlinkMacSystemFont,Segoe UI,Inter,Roboto,Arial,sans-serif}
+  .app{display:grid;grid-template-rows:auto 1fr auto;min-height:100%}
+  header{
+    position:sticky;top:0;z-index:5;padding:12px 14px calc(8px + env(safe-area-inset-top));
+    display:flex;gap:10px;align-items:center;justify-content:space-between;
+    background:linear-gradient(180deg,rgba(0,0,0,.03),transparent);
+    border-bottom:1px solid var(--ring);
+  }
+  .brand{font-weight:800;letter-spacing:.2px}
+  .row{display:flex;gap:8px;align-items:center;flex-wrap:wrap}
+  .chip{font-size:12px;color:var(--muted);padding:6px 10px;border:1px solid var(--ring);border-radius:999px}
+  main{padding:14px;display:grid;gap:12px}
+  .panel{background:var(--card);border:1px solid var(--ring);border-radius:14px;padding:12px;display:grid;gap:10px}
+  .grid{display:grid;gap:8px}
+  .grid-2{grid-template-columns:1fr 1fr}
+  label.small{font-size:12px;color:var(--muted)}
+  input[type="text"], textarea, select, input[type="number"], input[type="date"]{
+    width:100%;padding:10px 12px;border-radius:10px;border:1px solid var(--ring);background:var(--bg);color:var(--fg);outline:none
+  }
+  textarea{min-height:84px;resize:vertical}
+  .btn{display:inline-flex;align-items:center;justify-content:center;gap:8px;border:1px solid var(--ring);
+       background:var(--bg);color:var(--fg);padding:10px 14px;border-radius:12px;font-weight:700;cursor:pointer}
+  .btn.primary{background:var(--fg);color:var(--bg)}
+  .btn:disabled{opacity:.5;cursor:not-allowed}
+  .hint{font-size:12px;color:var(--muted)}
+  /* Náhled telefonu */
+  .phone{
+    background:var(--bg);border:1px solid var(--ring);border-radius:24px;padding:12px;display:grid;gap:8px
+  }
+  .stage{
+    position:relative;aspect-ratio:1290/2796;border-radius:18px;border:1px dashed var(--ring);overflow:hidden;background:var(--bg)
+  }
+  .safe{position:absolute;left:0;right:0;top:0;bottom:0;pointer-events:none}
+  .safe .top{position:absolute;left:0;right:0;top:0;height:var(--safe-top,280px);background:repeating-linear-gradient( to bottom, rgba(255,0,0,.08), rgba(255,0,0,.08) 6px, transparent 6px, transparent 10px)}
+  .safe .bottom{position:absolute;left:0;right:0;bottom:0;height:var(--safe-bottom,120px);background:repeating-linear-gradient( to top, rgba(255,0,0,.08), rgba(255,0,0,.08) 6px, transparent 6px, transparent 10px)}
+  .stage-inner{position:absolute;inset:0;display:flex;flex-direction:column;gap:10px;padding:var(--pad,40px)}
+  .title{font-weight:800;font-size:42px;line-height:1.05;letter-spacing:.2px}
+  .subtitle{color:var(--muted);font-size:14px;margin-top:-2px}
+  .tasks{margin-top:8px;display:grid;gap:10px}
+  .task{display:flex;gap:10px;align-items:flex-start}
+  .box{width:18px;height:18px;border:2px solid var(--fg);border-radius:4px;margin-top:2px}
+  .text{font-size:26px;line-height:1.25;word-break:break-word}
+  footer{position:sticky;bottom:0;z-index:5;padding:10px 14px calc(10px + env(safe-area-inset-bottom));display:flex;gap:8px;flex-wrap:wrap;border-top:1px solid var(--ring);background:linear-gradient(0deg,rgba(0,0,0,.03),transparent)}
+</style>
+</head>
+<body data-theme="light">
+<div class="app">
+  <header>
+    <div class="row">
+      <div class="brand">Daily Tasks Wallpaper</div>
+      <div class="chip" id="chipStatus">Připraveno</div>
+    </div>
+    <div class="row">
+      <button class="btn" id="themeBtn" title="Přepnout světlý/tmavý">🌓 Téma</button>
+    </div>
+  </header>
+
+  <main>
+    <section class="panel">
+      <div class="grid grid-2">
+        <div>
+          <label class="small">Datum</label>
+          <input type="date" id="dateInput"/>
+        </div>
+        <div>
+          <label class="small">Předvolba iPhone rozlišení</label>
+          <select id="preset">
+            <option value="1290x2796">1290×2796 (14/15 Pro Max)</option>
+            <option value="1179x2556">1179×2556 (14/15 Pro)</option>
+            <option value="1284x2778">1284×2778 (12/13 Pro Max, 14+)</option>
+            <option value="1170x2532">1170×2532 (12/13/14/15)</option>
+            <option value="1080x2340">1080×2340 (obecné)</option>
+            <option value="custom">Vlastní…</option>
+          </select>
+        </div>
+        <div>
+          <label class="small">Šířka (px)</label>
+          <input type="number" id="w" min="640" step="1" value="1290"/>
+        </div>
+        <div>
+          <label class="small">Výška (px)</label>
+          <input type="number" id="h" min="1136" step="1" value="2796"/>
+        </div>
+      </div>
+      <div class="grid grid-2">
+        <div>
+          <label class="small">Horní bezpečná zóna (hodiny/ Dynamic Island)</label>
+          <input type="number" id="safeTop" min="0" step="10" value="280"/>
+        </div>
+        <div>
+          <label class="small">Spodní bezpečná zóna</label>
+          <input type="number" id="safeBottom" min="0" step="10" value="140"/>
+        </div>
+      </div>
+      <div class="grid grid-2">
+        <div>
+          <label class="small">Titulek (např. „TASKS“)</label>
+          <input type="text" id="titleInput" placeholder="TASKS"/>
+        </div>
+        <div>
+          <label class="small">Podtitulek (např. „Úterý, 7. října“)</label>
+          <input type="text" id="subtitleInput" placeholder=""/>
+        </div>
+      </div>
+      <div>
+        <label class="small">Úkoly (1 řádek = 1 úkol)</label>
+        <textarea id="tasksInput" placeholder="Sklenice vody po probuzení&#10;10 min protažení&#10;Zavolat klientovi&#10;Dokončit prezentaci&#10;30 min čtení"></textarea>
+      </div>
+      <div class="row">
+        <button class="btn" id="generateBtn">🎲 Vygenerovat den</button>
+        <button class="btn" id="clearBtn">🧹 Vyčistit</button>
+        <span class="hint">Tip: Úkoly i nastavení se ukládají do zařízení (localStorage).</span>
+      </div>
+    </section>
+
+    <section class="panel phone">
+      <div class="row" style="justify-content:space-between">
+        <div class="chip">Náhled tapety</div>
+        <div class="row">
+          <button class="btn" id="fitBtn">🔍 Přizpůsobit náhled</button>
+          <label class="btn"><input id="toggleSafe" type="checkbox" checked/> Zobrazit bezpečné zóny</label>
+        </div>
+      </div>
+      <div class="stage" id="stage">
+        <div class="stage-inner" id="stageInner">
+          <div class="title" id="pvTitle">TASKS</div>
+          <div class="subtitle" id="pvSubtitle"></div>
+          <div class="tasks" id="pvTasks"></div>
+        </div>
+        <div class="safe" id="safeOverlay" aria-hidden="true">
+          <div class="top"></div>
+          <div class="bottom"></div>
+        </div>
+      </div>
+      <div class="row" style="justify-content:space-between">
+        <span class="hint">Čárkované oblasti nahoře/dole označují místa překrytá hodinami/gesty na zamknuté obrazovce.</span>
+        <div class="row">
+          <button class="btn primary" id="exportBtn">⬇️ Export PNG</button>
+          <button class="btn" id="shareBtn">🔗 Sdílet</button>
+        </div>
+      </div>
+    </section>
+
+    <section class="panel">
+      <div class="row" style="justify-content:space-between">
+        <div class="chip">Poznámka</div>
+        <div class="hint">iOS z bezpečnostních důvodů nedovoluje webu nastavit tapetu automaticky. Po exportu klepni na „Sdílet → Uložit obrázek“ a nastav ručně. Automatizovat to lze částečně přes aplikaci <em>Zkratky</em> (vybrat poslední obrázek z alba).</div>
+      </div>
+    </section>
+  </main>
+
+  <footer>
+    <button class="btn" id="saveBtn">💾 Uložit</button>
+    <button class="btn" id="loadBtn">📂 Načíst</button>
+    <span class="hint" id="status">—</span>
+  </footer>
+</div>
+
+<script>
+(function(){
+  const $ = sel => document.querySelector(sel);
+  const el = id => document.getElementById(id);
+  const st = {
+    theme: localStorage.getItem('theme') || 'light'
+  };
+
+  document.body.setAttribute('data-theme', st.theme);
+
+  // === Prefill ===
+  const todayISO = new Date().toISOString().slice(0,10);
+  el('dateInput').value = todayISO;
+  el('titleInput').value = 'TASKS';
+  el('subtitleInput').value = formatCzechDate(new Date());
+  el('tasksInput').value = (localStorage.getItem('tasksInput') || `Sklenice vody po probuzení
+10 min protažení
+Zavolat klientovi
+Dokončit prezentaci
+30 min čtení`).trim();
+
+  // === Theme toggle ===
+  el('themeBtn').addEventListener('click', ()=>{
+    const t = document.body.getAttribute('data-theme') === 'dark' ? 'light' : 'dark';
+    document.body.setAttribute('data-theme', t);
+    localStorage.setItem('theme', t);
+    renderPreview();
+  });
+
+  // === Presets ===
+  el('preset').addEventListener('change', ()=>{
+    const v = el('preset').value;
+    if(v==='custom') return;
+    const [W,H] = v.split('x').map(Number);
+    el('w').value = W; el('h').value = H;
+    renderPreview();
+  });
+
+  // === Inputs -> preview ===
+  ['dateInput','titleInput','subtitleInput','tasksInput','w','h','safeTop','safeBottom'].forEach(id=>{
+    el(id).addEventListener('input', renderPreview);
+  });
+
+  el('toggleSafe').addEventListener('change', ()=>{
+    el('safeOverlay').style.display = el('toggleSafe').checked ? 'block' : 'none';
+  });
+
+  el('fitBtn').addEventListener('click', ()=>{
+    // Přizpůsob výšku náhledu podle poměru stran
+    const stage = el('stage');
+    const W = +el('w').value || 1290, H = +el('h').value || 2796;
+    stage.style.aspectRatio = `${W}/${H}`;
+  });
+
+  // === Save/Load ===
+  el('saveBtn').addEventListener('click', ()=>{
+    const data = collectState();
+    localStorage.setItem('dailyTasksWallpaper', JSON.stringify(data));
+    localStorage.setItem('tasksInput', el('tasksInput').value);
+    setStatus('Uloženo ✔️');
+  });
+
+  el('loadBtn').addEventListener('click', ()=>{
+    const raw = localStorage.getItem('dailyTasksWallpaper');
+    if(!raw) return setStatus('Nic uloženého nenalezeno.');
+    try{
+      const data = JSON.parse(raw);
+      applyState(data);
+      setStatus('Načteno ✔️');
+    }catch(e){
+      console.error(e); setStatus('Chyba načítání.');
+    }
+  });
+
+  // === Generator ===
+  el('generateBtn').addEventListener('click', ()=>{
+    const tasks = generateDay();
+    el('tasksInput').value = tasks.join('\n');
+    el('subtitleInput').value = formatCzechDate(new Date(el('dateInput').value || todayISO));
+    renderPreview();
+  });
+  el('clearBtn').addEventListener('click', ()=>{
+    el('tasksInput').value = '';
+    renderPreview();
+  });
+
+  // === Export ===
+  el('exportBtn').addEventListener('click', async ()=>{
+    const png = await renderToPNG();
+    downloadBlob(png.blob, png.filename);
+    setStatus('PNG exportováno ✔️');
+  });
+
+  el('shareBtn').addEventListener('click', async ()=>{
+    const png = await renderToPNG();
+    try{
+      if(navigator.canShare && navigator.canShare({ files:[png.file] })){
+        await navigator.share({ files:[png.file], title:'Daily Tasks', text:'Tapeta s dnešními úkoly' });
+      }else{
+        downloadBlob(png.blob, png.filename);
+      }
+      setStatus('Sdíleno / staženo ✔️');
+    }catch(e){
+      console.warn(e);
+      downloadBlob(png.blob, png.filename);
+    }
+  });
+
+  // === INIT ===
+  renderPreview();
+
+  // ---------- Helpers ----------
+  function collectState(){
+    return {
+      theme: document.body.getAttribute('data-theme'),
+      date: el('dateInput').value,
+      title: el('titleInput').value,
+      subtitle: el('subtitleInput').value,
+      tasks: el('tasksInput').value,
+      w:+el('w').value, h:+el('h').value,
+      safeTop:+el('safeTop').value, safeBottom:+el('safeBottom').value,
+      preset: el('preset').value
+    };
+  }
+  function applyState(d){
+    document.body.setAttribute('data-theme', d.theme||'light');
+    el('dateInput').value = d.date || todayISO;
+    el('titleInput').value = d.title || 'TASKS';
+    el('subtitleInput').value = d.subtitle || formatCzechDate(new Date());
+    el('tasksInput').value = d.tasks || '';
+    el('w').value = d.w || 1290; el('h').value = d.h || 2796;
+    el('safeTop').value = d.safeTop ?? 280; el('safeBottom').value = d.safeBottom ?? 140;
+    el('preset').value = d.preset || '1290x2796';
+    renderPreview();
+  }
+  function setStatus(msg){ el('status').textContent = msg; el('chipStatus').textContent = msg; setTimeout(()=>{ el('status').textContent='—'; el('chipStatus').textContent='Připraveno'; }, 2500); }
+
+  function renderPreview(){
+    const title = el('titleInput').value || 'TASKS';
+    const subtitle = el('subtitleInput').value || '';
+    const tasks = (el('tasksInput').value||'').split('\n').map(x=>x.trim()).filter(Boolean);
+
+    el('pvTitle').textContent = title;
+    el('pvSubtitle').textContent = subtitle;
+    const list = el('pvTasks'); list.innerHTML = '';
+    tasks.forEach(t=>{
+      const row = document.createElement('div'); row.className='task';
+      const box = document.createElement('div'); box.className='box';
+      const text = document.createElement('div'); text.className='text'; text.textContent = t;
+      row.appendChild(box); row.appendChild(text); list.appendChild(row);
+    });
+
+    // Safe overlay sizes
+    const top = +el('safeTop').value || 0;
+    const bottom = +el('safeBottom').value || 0;
+    el('safeOverlay').style.setProperty('--safe-top', top+'px');
+    el('safeOverlay').style.setProperty('--safe-bottom', bottom+'px');
+  }
+
+  function formatCzechDate(d){
+    const WD=['Neděle','Pondělí','Úterý','Středa','Čtvrtek','Pátek','Sobota'][d.getDay()];
+    const M=['ledna','února','března','dubna','května','června','července','srpna','září','října','listopadu','prosince'][d.getMonth()];
+    return `${WD}, ${d.getDate()}. ${M}`;
+  }
+
+  function generateDay(){
+    // Jednoduchý generátor rutiny (mix ranní/pracovní/večerní)
+    const morning = [
+      'Sklenice vody po probuzení','10 min protažení','5 min dýchání','Naplánovat 3 priority dne'
+    ];
+    const work = [
+      'Zkontrolovat inbox (15 min)','Deep work blok (60 min)','Zavolat 1 klientovi','Dokončit 1 úkol s dopadem'
+    ];
+    const evening = [
+      '30 min čtení','Krátký zápis do deníku','Příprava na zítřek','Lehká večeře'
+    ];
+    // Vyber 2-3 z každé skupiny
+    function pick(arr,n){ const a=[...arr]; const out=[]; while(n-- && a.length){ out.push(a.splice(Math.floor(Math.random()*a.length),1)[0]); } return out; }
+    const tasks = [...pick(morning,2), ...pick(work,3), ...pick(evening,2)];
+    return tasks;
+  }
+
+  function downloadBlob(blob, filename){
+    const a = document.createElement('a');
+    a.href = URL.createObjectURL(blob);
+    a.download = filename;
+    document.body.appendChild(a); a.click();
+    setTimeout(()=>{ URL.revokeObjectURL(a.href); a.remove(); }, 0);
+  }
+
+  async function renderToPNG(){
+    const W = +el('w').value || 1290;
+    const H = +el('h').value || 2796;
+    const safeTop = +el('safeTop').value || 0;
+    const safeBottom = +el('safeBottom').value || 0;
+    const theme = document.body.getAttribute('data-theme') || 'light';
+
+    // Canvas
+    const cvs = document.createElement('canvas');
+    cvs.width = W; cvs.height = H;
+    const ctx = cvs.getContext('2d');
+
+    // Colors
+    const BG = theme==='dark' ? '#0b0b0b' : '#ffffff';
+    const FG = theme==='dark' ? '#f6f6f6' : '#0a0a0a';
+    const MUTED = theme==='dark' ? '#a8a8a8' : '#7a7a7a';
+
+    // Fill background
+    ctx.fillStyle = BG; ctx.fillRect(0,0,W,H);
+
+    // Padding
+    const PAD = Math.round(W*0.06); // procentuální padding
+    const X = PAD;
+    let Y = Math.max(PAD, safeTop + Math.round(PAD*0.4));
+    const MAXW = W - PAD*2;
+
+    // Title
+    ctx.fillStyle = FG;
+    ctx.font = `800 ${Math.round(W*0.08)}px -apple-system,Segoe UI,Inter,Roboto,Arial`;
+    ctx.textBaseline = 'top';
+    ctx.fillText(el('titleInput').value || 'TASKS', X, Y);
+    Y += Math.round(W*0.08) + Math.round(W*0.012);
+
+    // Subtitle
+    ctx.fillStyle = MUTED;
+    ctx.font = `400 ${Math.round(W*0.028)}px -apple-system,Segoe UI,Inter,Roboto,Arial`;
+    const subtitle = el('subtitleInput').value || '';
+    if(subtitle){
+      ctx.fillText(subtitle, X, Y);
+      Y += Math.round(W*0.045);
+    } else {
+      Y += Math.round(W*0.02);
+    }
+
+    // Tasks
+    const tasks = (el('tasksInput').value||'').split('\n').map(t=>t.trim()).filter(Boolean);
+    ctx.fillStyle = FG;
+    ctx.lineWidth = Math.max(2, Math.round(W*0.0016));
+    const boxSize = Math.round(W*0.018) + 12;
+    const gap = Math.round(W*0.018) + 10;
+    const lineH = Math.round(W*0.045);
+
+    ctx.font = `500 ${Math.round(W*0.038)}px -apple-system,Segoe UI,Inter,Roboto,Arial`;
+
+    tasks.forEach(t=>{
+      // Box
+      ctx.strokeStyle = FG;
+      ctx.strokeRect(X, Y + 6, boxSize, boxSize);
+      // Text (wrap)
+      const textX = X + boxSize + 12;
+      const wrapped = wrapText(ctx, t, MAXW - boxSize - 12, lineH);
+      wrapped.lines.forEach((ln, i)=>{
+        ctx.fillText(ln, textX, Y + i*lineH);
+      });
+      Y += wrapped.height + gap;
+    });
+
+    // Leave bottom safe area
+    Y = H - safeBottom;
+
+    // Export
+    const blob = await new Promise(res=> cvs.toBlob(res, 'image/png', 1));
+    const filename = `tasks_${(el('dateInput').value||todayISO)}_${W}x${H}.png`;
+    const file = new File([blob], filename, { type:'image/png' });
+    return { blob, file, filename };
+  }
+
+  function wrapText(ctx, text, maxWidth, lineHeight){
+    const words = text.split(' ');
+    const lines = [];
+    let line = '';
+    for (let i=0;i<words.length;i++){
+      const test = line ? line + ' ' + words[i] : words[i];
+      const w = ctx.measureText(test).width;
+      if (w > maxWidth && line){
+        lines.push(line);
+        line = words[i];
+      }else{
+        line = test;
+      }
+    }
+    if(line) lines.push(line);
+    return { lines, height: lines.length*lineHeight };
+  }
+
+})();
+</script>
+</body>
+</html>
