@@ -3,459 +3,377 @@
 <head>
 <meta charset="utf-8"/>
 <meta name="viewport" content="width=device-width, initial-scale=1, maximum-scale=1, viewport-fit=cover"/>
-<title>Daily Tasks → iPhone Tapeta</title>
+<title>Daily Planner → PNG</title>
 <style>
   :root{
-    --bg:#ffffff; --fg:#0a0a0a; --muted:#7a7a7a; --accent:#111; --ring:#e8e8e8;
-    --card:#f6f6f6; --ok:#12b886; --warn:#f08c00;
+    --bg:#ffffff; --fg:#0b0b0b; --muted:#8b8f98; --ring:#e9eaee;
+    --card:#f8f9fb; --blue:#2563eb; --blue2:#00c2ff;
   }
   [data-theme="dark"]{
-    --bg:#0b0b0b; --fg:#f6f6f6; --muted:#a8a8a8; --accent:#fafafa; --ring:#1f1f1f;
-    --card:#141414; --ok:#37ef9d; --warn:#ffb000;
+    --bg:#0c0d12; --fg:#f3f5f7; --muted:#a0a7b5; --ring:#191b22; --card:#11131a;
   }
-  html,body{height:100%;margin:0;background:var(--bg);color:var(--fg);font-family:-apple-system,BlinkMacSystemFont,Segoe UI,Inter,Roboto,Arial,sans-serif}
-  .app{display:grid;grid-template-rows:auto 1fr auto;min-height:100%}
+  html,body{height:100%;margin:0;background:var(--bg);color:var(--fg);
+    font-family: ui-sans-serif, -apple-system,BlinkMacSystemFont,"Segoe UI",Inter,Roboto,Arial}
+  .app{min-height:100%;display:grid;grid-template-rows:auto 1fr auto}
+
+  /* Header */
   header{
     position:sticky;top:0;z-index:5;padding:12px 14px calc(8px + env(safe-area-inset-top));
-    display:flex;gap:10px;align-items:center;justify-content:space-between;
+    display:flex;align-items:center;justify-content:space-between;gap:10px;
     background:linear-gradient(180deg,rgba(0,0,0,.03),transparent);
-    border-bottom:1px solid var(--ring);
+    border-bottom:1px solid var(--ring)
   }
-  .brand{font-weight:800;letter-spacing:.2px}
-  .row{display:flex;gap:8px;align-items:center;flex-wrap:wrap}
+  .brand{font-weight:900;letter-spacing:.2px}
   .chip{font-size:12px;color:var(--muted);padding:6px 10px;border:1px solid var(--ring);border-radius:999px}
+
+  /* Panels */
   main{padding:14px;display:grid;gap:12px}
-  .panel{background:var(--card);border:1px solid var(--ring);border-radius:14px;padding:12px;display:grid;gap:10px}
-  .grid{display:grid;gap:8px}
-  .grid-2{grid-template-columns:1fr 1fr}
-  label.small{font-size:12px;color:var(--muted)}
-  input[type="text"], textarea, select, input[type="number"], input[type="date"]{
-    width:100%;padding:10px 12px;border-radius:10px;border:1px solid var(--ring);background:var(--bg);color:var(--fg);outline:none
+  .panel{background:var(--card);border:1px solid var(--ring);border-radius:16px;padding:12px;display:grid;gap:10px}
+
+  /* Inputs row – no overlap */
+  .inputs{
+    display:grid;gap:8px;
+    grid-template-columns: 110px 110px 1fr 120px;
+    align-items:center;
   }
-  textarea{min-height:84px;resize:vertical}
-  .btn{display:inline-flex;align-items:center;justify-content:center;gap:8px;border:1px solid var(--ring);
-       background:var(--bg);color:var(--fg);padding:10px 14px;border-radius:12px;font-weight:700;cursor:pointer}
-  .btn.primary{background:var(--fg);color:var(--bg)}
-  .btn:disabled{opacity:.5;cursor:not-allowed}
-  .hint{font-size:12px;color:var(--muted)}
-  /* Náhled telefonu */
-  .phone{
-    background:var(--bg);border:1px solid var(--ring);border-radius:24px;padding:12px;display:grid;gap:8px
+  .inputs input[type="time"], .inputs input[type="text"]{
+    width:100%;padding:10px 12px;border-radius:12px;border:1px solid var(--ring);background:var(--bg);color:var(--fg);outline:none
   }
-  .stage{
-    position:relative;aspect-ratio:1290/2796;border-radius:18px;border:1px dashed var(--ring);overflow:hidden;background:var(--bg)
+  .add-btn{
+    border:1px solid var(--ring);border-radius:12px;padding:10px 14px;font-weight:800;background:var(--bg);color:var(--fg);cursor:pointer
   }
-  .safe{position:absolute;left:0;right:0;top:0;bottom:0;pointer-events:none}
-  .safe .top{position:absolute;left:0;right:0;top:0;height:var(--safe-top,280px);background:repeating-linear-gradient( to bottom, rgba(255,0,0,.08), rgba(255,0,0,.08) 6px, transparent 6px, transparent 10px)}
-  .safe .bottom{position:absolute;left:0;right:0;bottom:0;height:var(--safe-bottom,120px);background:repeating-linear-gradient( to top, rgba(255,0,0,.08), rgba(255,0,0,.08) 6px, transparent 6px, transparent 10px)}
-  .stage-inner{position:absolute;inset:0;display:flex;flex-direction:column;gap:10px;padding:var(--pad,40px)}
-  .title{font-weight:800;font-size:42px;line-height:1.05;letter-spacing:.2px}
-  .subtitle{color:var(--muted);font-size:14px;margin-top:-2px}
-  .tasks{margin-top:8px;display:grid;gap:10px}
-  .task{display:flex;gap:10px;align-items:flex-start}
-  .box{width:18px;height:18px;border:2px solid var(--fg);border-radius:4px;margin-top:2px}
-  .text{font-size:26px;line-height:1.25;word-break:break-word}
-  footer{position:sticky;bottom:0;z-index:5;padding:10px 14px calc(10px + env(safe-area-inset-bottom));display:flex;gap:8px;flex-wrap:wrap;border-top:1px solid var(--ring);background:linear-gradient(0deg,rgba(0,0,0,.03),transparent)}
+  @media (max-width: 560px){
+    .inputs{ grid-template-columns: 1fr 1fr; }
+    .inputs input[type="text"]{ grid-column: 1 / -1; }
+    .add-btn{ grid-column: 1 / -1; }
+  }
+
+  /* Templates */
+  .templates{display:flex;gap:8px;flex-wrap:wrap}
+  .tpl{padding:8px 12px;border-radius:999px;border:1px dashed var(--ring);background:transparent;color:var(--muted);font-weight:800;cursor:pointer}
+  .tpl:hover{border-style:solid;color:var(--fg)}
+
+  /* List */
+  .list{display:grid;gap:8px}
+  .item{display:grid;grid-template-columns: 120px 1fr auto;gap:10px;align-items:center;
+        background:var(--bg);border:1px solid var(--ring);border-radius:12px;padding:10px}
+  .time{font-weight:900;letter-spacing:.2px}
+  .txt{opacity:.95}
+  .actions{display:flex;gap:6px}
+  .btn{padding:8px 10px;border:1px solid var(--ring);border-radius:10px;background:var(--bg);color:var(--fg);font-weight:700;cursor:pointer}
+  .btn.blue{
+    border:none;color:#fff;background:linear-gradient(135deg,var(--blue),var(--blue2));
+    box-shadow:0 6px 18px rgba(37,99,235,.25)
+  }
+
+  /* Bottom bar */
+  footer{
+    position:sticky;bottom:0;z-index:5;padding:10px 14px calc(10px + env(safe-area-inset-bottom));
+    display:flex;gap:8px;flex-wrap:wrap;justify-content:space-between;align-items:center;
+    border-top:1px solid var(--ring);background:linear-gradient(0deg,rgba(0,0,0,.03),transparent)
+  }
+  select, input[type="number"]{
+    padding:10px;border-radius:10px;border:1px solid var(--ring);background:var(--bg);color:var(--fg)
+  }
+  .hidden{display:none !important}
 </style>
 </head>
 <body data-theme="light">
 <div class="app">
   <header>
-    <div class="row">
-      <div class="brand">Daily Tasks Wallpaper</div>
-      <div class="chip" id="chipStatus">Připraveno</div>
+    <div style="display:flex;align-items:center;gap:10px">
+      <div class="brand">Daily Planner</div>
+      <div class="chip" id="msg">Připraveno</div>
     </div>
-    <div class="row">
-      <button class="btn" id="themeBtn" title="Přepnout světlý/tmavý">🌓 Téma</button>
+    <div style="display:flex;gap:8px">
+      <button class="btn" id="themeBtn">🌓 Téma</button>
     </div>
   </header>
 
   <main>
+    <!-- Quick add -->
     <section class="panel">
-      <div class="grid grid-2">
-        <div>
-          <label class="small">Datum</label>
+      <div class="inputs">
+        <input type="time" id="from" value="08:00" aria-label="Od">
+        <input type="time" id="to" value="08:30" aria-label="Do">
+        <input type="text" id="what" placeholder="Co (např. Deep Work, Workout, Call…)" aria-label="Co">
+        <button class="add-btn" id="addBtn">＋ Přidat</button>
+      </div>
+      <div class="templates">
+        <button class="tpl" data-tpl="workday">Pracovní den</button>
+        <button class="tpl" data-tpl="maker">Maker ráno</button>
+        <button class="tpl" data-tpl="wellness">Wellness večer</button>
+        <button class="tpl" data-tpl="clear">Vymazat plán</button>
+      </div>
+    </section>
+
+    <!-- Seznam bloků -->
+    <section class="panel">
+      <div style="display:flex;justify-content:space-between;align-items:center;gap:8px;flex-wrap:wrap">
+        <div class="chip">Dnešní plán</div>
+        <div style="display:flex;gap:8px;align-items:center">
           <input type="date" id="dateInput"/>
-        </div>
-        <div>
-          <label class="small">Předvolba iPhone rozlišení</label>
-          <select id="preset">
-            <option value="1290x2796">1290×2796 (14/15 Pro Max)</option>
-            <option value="1179x2556">1179×2556 (14/15 Pro)</option>
-            <option value="1284x2778">1284×2778 (12/13 Pro Max, 14+)</option>
-            <option value="1170x2532">1170×2532 (12/13/14/15)</option>
-            <option value="1080x2340">1080×2340 (obecné)</option>
-            <option value="custom">Vlastní…</option>
-          </select>
-        </div>
-        <div>
-          <label class="small">Šířka (px)</label>
-          <input type="number" id="w" min="640" step="1" value="1290"/>
-        </div>
-        <div>
-          <label class="small">Výška (px)</label>
-          <input type="number" id="h" min="1136" step="1" value="2796"/>
+          <button class="btn" id="sortBtn">↕ Seřadit</button>
         </div>
       </div>
-      <div class="grid grid-2">
-        <div>
-          <label class="small">Horní bezpečná zóna (hodiny/ Dynamic Island)</label>
-          <input type="number" id="safeTop" min="0" step="10" value="280"/>
-        </div>
-        <div>
-          <label class="small">Spodní bezpečná zóna</label>
-          <input type="number" id="safeBottom" min="0" step="10" value="140"/>
-        </div>
-      </div>
-      <div class="grid grid-2">
-        <div>
-          <label class="small">Titulek (např. „TASKS“)</label>
-          <input type="text" id="titleInput" placeholder="TASKS"/>
-        </div>
-        <div>
-          <label class="small">Podtitulek (např. „Úterý, 7. října“)</label>
-          <input type="text" id="subtitleInput" placeholder=""/>
-        </div>
-      </div>
-      <div>
-        <label class="small">Úkoly (1 řádek = 1 úkol)</label>
-        <textarea id="tasksInput" placeholder="Sklenice vody po probuzení&#10;10 min protažení&#10;Zavolat klientovi&#10;Dokončit prezentaci&#10;30 min čtení"></textarea>
-      </div>
-      <div class="row">
-        <button class="btn" id="generateBtn">🎲 Vygenerovat den</button>
-        <button class="btn" id="clearBtn">🧹 Vyčistit</button>
-        <span class="hint">Tip: Úkoly i nastavení se ukládají do zařízení (localStorage).</span>
-      </div>
-    </section>
-
-    <section class="panel phone">
-      <div class="row" style="justify-content:space-between">
-        <div class="chip">Náhled tapety</div>
-        <div class="row">
-          <button class="btn" id="fitBtn">🔍 Přizpůsobit náhled</button>
-          <label class="btn"><input id="toggleSafe" type="checkbox" checked/> Zobrazit bezpečné zóny</label>
-        </div>
-      </div>
-      <div class="stage" id="stage">
-        <div class="stage-inner" id="stageInner">
-          <div class="title" id="pvTitle">TASKS</div>
-          <div class="subtitle" id="pvSubtitle"></div>
-          <div class="tasks" id="pvTasks"></div>
-        </div>
-        <div class="safe" id="safeOverlay" aria-hidden="true">
-          <div class="top"></div>
-          <div class="bottom"></div>
-        </div>
-      </div>
-      <div class="row" style="justify-content:space-between">
-        <span class="hint">Čárkované oblasti nahoře/dole označují místa překrytá hodinami/gesty na zamknuté obrazovce.</span>
-        <div class="row">
-          <button class="btn primary" id="exportBtn">⬇️ Export PNG</button>
-          <button class="btn" id="shareBtn">🔗 Sdílet</button>
-        </div>
-      </div>
-    </section>
-
-    <section class="panel">
-      <div class="row" style="justify-content:space-between">
-        <div class="chip">Poznámka</div>
-        <div class="hint">iOS z bezpečnostních důvodů nedovoluje webu nastavit tapetu automaticky. Po exportu klepni na „Sdílet → Uložit obrázek“ a nastav ručně. Automatizovat to lze částečně přes aplikaci <em>Zkratky</em> (vybrat poslední obrázek z alba).</div>
-      </div>
+      <div class="list" id="list"></div>
     </section>
   </main>
 
   <footer>
-    <button class="btn" id="saveBtn">💾 Uložit</button>
-    <button class="btn" id="loadBtn">📂 Načíst</button>
-    <span class="hint" id="status">—</span>
+    <div style="display:flex;gap:8px;align-items:center;flex-wrap:wrap">
+      <label>Telefon</label>
+      <select id="device">
+        <option value="1290x2796">iPhone 15/14 Pro Max (1290×2796)</option>
+        <option value="1179x2556">iPhone 15/14 Pro (1179×2556)</option>
+        <option value="1284x2778">iPhone 12/13 Pro Max, 14+ (1284×2778)</option>
+        <option value="1170x2532">iPhone 12/13/14/15 (1170×2532)</option>
+        <option value="1080x2340">iPhone 12/13 mini / obecné (1080×2340)</option>
+        <option value="custom">Vlastní…</option>
+      </select>
+      <input id="w" class="hidden" type="number" min="640" step="1" placeholder="Šířka (px)"/>
+      <input id="h" class="hidden" type="number" min="1136" step="1" placeholder="Výška (px)"/>
+    </div>
+    <div style="display:flex;gap:8px;align-items:center">
+      <button class="btn blue" id="exportBtn">⬇️ Export PNG</button>
+      <button class="btn" id="clearAllBtn">🧹 Vymazat vše</button>
+    </div>
   </footer>
 </div>
 
 <script>
-(function(){
-  const $ = sel => document.querySelector(sel);
+(()=> {
   const el = id => document.getElementById(id);
-  const st = {
-    theme: localStorage.getItem('theme') || 'light'
-  };
+  const msg = t => { el('msg').textContent = t; setTimeout(()=>el('msg').textContent='Připraveno', 1800); };
+  const pad = n => String(n).padStart(2,'0');
+  const toMin = hhmm => { const [h,m] = hhmm.split(':').map(Number); return h*60+m; };
+  const toHHMM = m  => pad(Math.floor(m/60))+':'+pad(m%60);
 
-  document.body.setAttribute('data-theme', st.theme);
+  let items = []; // {id, from, to, what}
 
-  // === Prefill ===
-  const todayISO = new Date().toISOString().slice(0,10);
-  el('dateInput').value = todayISO;
-  el('titleInput').value = 'TASKS';
-  el('subtitleInput').value = formatCzechDate(new Date());
-  el('tasksInput').value = (localStorage.getItem('tasksInput') || `Sklenice vody po probuzení
-10 min protažení
-Zavolat klientovi
-Dokončit prezentaci
-30 min čtení`).trim();
-
-  // === Theme toggle ===
+  // THEME
+  let theme = (localStorage.getItem('dp.theme') || 'light');
+  document.body.setAttribute('data-theme', theme);
   el('themeBtn').addEventListener('click', ()=>{
-    const t = document.body.getAttribute('data-theme') === 'dark' ? 'light' : 'dark';
-    document.body.setAttribute('data-theme', t);
-    localStorage.setItem('theme', t);
-    renderPreview();
+    theme = (theme==='dark') ? 'light' : 'dark';
+    document.body.setAttribute('data-theme', theme);
+    localStorage.setItem('dp.theme', theme);
   });
 
-  // === Presets ===
-  el('preset').addEventListener('change', ()=>{
-    const v = el('preset').value;
-    if(v==='custom') return;
-    const [W,H] = v.split('x').map(Number);
-    el('w').value = W; el('h').value = H;
-    renderPreview();
+  // DATE
+  el('dateInput').value = new Date().toISOString().slice(0,10);
+
+  // ADD
+  el('addBtn').addEventListener('click', ()=>{
+    const f = el('from').value, t = el('to').value, w = el('what').value.trim();
+    if(!f || !t || !w) return msg('Vyplň čas i text');
+    if(toMin(t) <= toMin(f)) return msg('„Do“ musí být později než „Od“');
+    items.push({ id: uid(), from: f, to: t, what: w });
+    sortItems(); renderList(); el('what').value='';
   });
 
-  // === Inputs -> preview ===
-  ['dateInput','titleInput','subtitleInput','tasksInput','w','h','safeTop','safeBottom'].forEach(id=>{
-    el(id).addEventListener('input', renderPreview);
+  // TEMPLATES
+  document.querySelectorAll('.tpl').forEach(b=>{
+    b.addEventListener('click', ()=>{
+      const id = b.dataset.tpl;
+      if(id==='clear'){ items=[]; renderList(); return; }
+      items = template(id); sortItems(); renderList();
+    });
   });
 
-  el('toggleSafe').addEventListener('change', ()=>{
-    el('safeOverlay').style.display = el('toggleSafe').checked ? 'block' : 'none';
+  // SORT
+  el('sortBtn').addEventListener('click', ()=>{ sortItems(); renderList(); });
+
+  // CLEAR ALL
+  el('clearAllBtn').addEventListener('click', ()=>{
+    if(confirm('Vymazat celý plán?')){ items=[]; renderList(); }
   });
 
-  el('fitBtn').addEventListener('click', ()=>{
-    // Přizpůsob výšku náhledu podle poměru stran
-    const stage = el('stage');
-    const W = +el('w').value || 1290, H = +el('h').value || 2796;
-    stage.style.aspectRatio = `${W}/${H}`;
+  // DEVICE select
+  el('device').addEventListener('change', ()=>{
+    const v = el('device').value;
+    const custom = (v==='custom');
+    el('w').classList.toggle('hidden', !custom);
+    el('h').classList.toggle('hidden', !custom);
   });
 
-  // === Save/Load ===
-  el('saveBtn').addEventListener('click', ()=>{
-    const data = collectState();
-    localStorage.setItem('dailyTasksWallpaper', JSON.stringify(data));
-    localStorage.setItem('tasksInput', el('tasksInput').value);
-    setStatus('Uloženo ✔️');
-  });
-
-  el('loadBtn').addEventListener('click', ()=>{
-    const raw = localStorage.getItem('dailyTasksWallpaper');
-    if(!raw) return setStatus('Nic uloženého nenalezeno.');
-    try{
-      const data = JSON.parse(raw);
-      applyState(data);
-      setStatus('Načteno ✔️');
-    }catch(e){
-      console.error(e); setStatus('Chyba načítání.');
-    }
-  });
-
-  // === Generator ===
-  el('generateBtn').addEventListener('click', ()=>{
-    const tasks = generateDay();
-    el('tasksInput').value = tasks.join('\n');
-    el('subtitleInput').value = formatCzechDate(new Date(el('dateInput').value || todayISO));
-    renderPreview();
-  });
-  el('clearBtn').addEventListener('click', ()=>{
-    el('tasksInput').value = '';
-    renderPreview();
-  });
-
-  // === Export ===
+  // EXPORT
   el('exportBtn').addEventListener('click', async ()=>{
-    const png = await renderToPNG();
-    downloadBlob(png.blob, png.filename);
-    setStatus('PNG exportováno ✔️');
+    if(items.length===0){ msg('Přidej aspoň jeden blok'); return; }
+    const size = getSize();
+    const blob = await renderPNG(size.w, size.h);
+    const name = `daily_${el('dateInput').value}_${size.w}x${size.h}.png`;
+    downloadBlob(blob, name);
+    msg('Export hotov ✔️');
   });
 
-  el('shareBtn').addEventListener('click', async ()=>{
-    const png = await renderToPNG();
-    try{
-      if(navigator.canShare && navigator.canShare({ files:[png.file] })){
-        await navigator.share({ files:[png.file], title:'Daily Tasks', text:'Tapeta s dnešními úkoly' });
-      }else{
-        downloadBlob(png.blob, png.filename);
-      }
-      setStatus('Sdíleno / staženo ✔️');
-    }catch(e){
-      console.warn(e);
-      downloadBlob(png.blob, png.filename);
+  // RENDER LIST
+  function renderList(){
+    const wrap = el('list'); wrap.innerHTML='';
+    if(!items.length){
+      wrap.innerHTML = `<div class="chip" style="border-style:dashed">Žádné bloky. Přidej nahoře nebo použij šablonu.</div>`;
+      return;
     }
-  });
-
-  // === INIT ===
-  renderPreview();
-
-  // ---------- Helpers ----------
-  function collectState(){
-    return {
-      theme: document.body.getAttribute('data-theme'),
-      date: el('dateInput').value,
-      title: el('titleInput').value,
-      subtitle: el('subtitleInput').value,
-      tasks: el('tasksInput').value,
-      w:+el('w').value, h:+el('h').value,
-      safeTop:+el('safeTop').value, safeBottom:+el('safeBottom').value,
-      preset: el('preset').value
-    };
+    items.forEach(it=>{
+      const row = document.createElement('div'); row.className='item';
+      const time = document.createElement('div'); time.className='time'; time.textContent = `${it.from}–${it.to}`;
+      const txt = document.createElement('div'); txt.className='txt'; txt.textContent = it.what;
+      const actions = document.createElement('div'); actions.className='actions';
+      const edit = button('✎', ()=>editItem(it.id));
+      const del  = button('×', ()=>{ items = items.filter(x=>x.id!==it.id); renderList(); });
+      actions.append(edit, del);
+      row.append(time, txt, actions); wrap.appendChild(row);
+    });
   }
-  function applyState(d){
-    document.body.setAttribute('data-theme', d.theme||'light');
-    el('dateInput').value = d.date || todayISO;
-    el('titleInput').value = d.title || 'TASKS';
-    el('subtitleInput').value = d.subtitle || formatCzechDate(new Date());
-    el('tasksInput').value = d.tasks || '';
-    el('w').value = d.w || 1290; el('h').value = d.h || 2796;
-    el('safeTop').value = d.safeTop ?? 280; el('safeBottom').value = d.safeBottom ?? 140;
-    el('preset').value = d.preset || '1290x2796';
-    renderPreview();
+  function button(label, on){ const b=document.createElement('button'); b.className='btn'; b.textContent=label; b.addEventListener('click', on); return b; }
+  function editItem(id){
+    const it = items.find(x=>x.id===id); if(!it) return;
+    const f = prompt('Od (HH:MM):', it.from); if(!f) return;
+    const t = prompt('Do (HH:MM):', it.to); if(!t) return;
+    const w = prompt('Co:', it.what); if(!w) return;
+    if(toMin(t) <= toMin(f)) return msg('„Do“ musí být později než „Od“');
+    it.from=f; it.to=t; it.what=w.trim(); sortItems(); renderList();
   }
-  function setStatus(msg){ el('status').textContent = msg; el('chipStatus').textContent = msg; setTimeout(()=>{ el('status').textContent='—'; el('chipStatus').textContent='Připraveno'; }, 2500); }
+  function sortItems(){ items.sort((a,b)=> toMin(a.from) - toMin(b.from) || toMin(a.to)-toMin(b.to)); }
+  function uid(){ return Math.random().toString(36).slice(2,9); }
 
-  function renderPreview(){
-    const title = el('titleInput').value || 'TASKS';
-    const subtitle = el('subtitleInput').value || '';
-    const tasks = (el('tasksInput').value||'').split('\n').map(x=>x.trim()).filter(Boolean);
+  // PRESETS
+  function template(id){
+    const B=(f,t,w)=>({id:uid(),from:f,to:t,what:w});
+    if(id==='workday') return [
+      B('07:30','08:00','Ranní rutina'),
+      B('08:00','10:30','Deep Work blok'),
+      B('10:30','11:00','E-maily & administrace'),
+      B('11:00','12:00','Schůzky / Calls'),
+      B('12:00','13:00','Oběd & procházka'),
+      B('13:00','15:00','Projekt A — fokus'),
+      B('15:00','15:30','Káva & reset'),
+      B('15:30','17:00','Projekt B — dodávky'),
+      B('17:30','18:30','Workout / běh'),
+      B('19:00','21:00','Volno / rodina / čtení')
+    ];
+    if(id==='maker') return [
+      B('06:30','07:15','Lehký strečink & plán dne'),
+      B('07:15','09:45','Tvorba / psaní / kód'),
+      B('09:45','10:15','Pauza & e-maily'),
+      B('10:15','12:00','Tvorba pokračování')
+    ];
+    if(id==='wellness') return [
+      B('18:00','18:45','Lehký trénink'),
+      B('18:45','19:15','Sprcha / večeře'),
+      B('19:30','20:00','Procházka'),
+      B('20:00','21:00','Čtení / off-screen')
+    ];
+    return [];
+  }
 
-    el('pvTitle').textContent = title;
-    el('pvSubtitle').textContent = subtitle;
-    const list = el('pvTasks'); list.innerHTML = '';
-    tasks.forEach(t=>{
-      const row = document.createElement('div'); row.className='task';
-      const box = document.createElement('div'); box.className='box';
-      const text = document.createElement('div'); text.className='text'; text.textContent = t;
-      row.appendChild(box); row.appendChild(text); list.appendChild(row);
+  // CANVAS RENDER — left-aligned, vertically centered block
+  async function renderPNG(W, H){
+    // Colors
+    const BG = (theme==='dark') ? '#0c0d12' : '#ffffff';
+    const FG = (theme==='dark') ? '#f3f5f7' : '#0b0b0b';
+    const MUTED = (theme==='dark') ? '#a0a7b5' : '#8b8f98';
+
+    // Base sizes (will auto-scale if content is long)
+    let titleSize = Math.round(W*0.085);
+    let lineSize  = Math.round(W*0.038);
+    let gap       = Math.round(W*0.018);
+    let lineH     = Math.round(W*0.048);
+    const PAD_L   = Math.round(W*0.07);      // left offset
+    const PAD_R   = Math.round(W*0.06);      // right padding
+
+    const cvs = document.createElement('canvas'); cvs.width=W; cvs.height=H;
+    const ctx = cvs.getContext('2d');
+
+    // Measure total height to center vertically
+    function measureTotal(){
+      ctx.font = `900 ${titleSize}px Inter, -apple-system, Segoe UI, Roboto, Arial`;
+      const hTitle = titleSize;
+      ctx.font = `500 ${Math.round(W*0.03)}px Inter, -apple-system, Segoe UI, Roboto, Arial`;
+      const hDate = Math.round(W*0.05);
+      const linesH = items.length * lineH + Math.max(0, items.length-1) * (gap - (lineH - lineSize)); // visual spacing
+      return hTitle + Math.round(W*0.02) + hDate + Math.round(W*0.04) + linesH;
+    }
+
+    // If overflow, scale down
+    let total = measureTotal();
+    if(total > H * 0.88){
+      const s = (H*0.88) / total;
+      titleSize = Math.max(28, Math.floor(titleSize*s));
+      lineSize  = Math.max(16, Math.floor(lineSize*s));
+      lineH     = Math.max(lineSize+6, Math.floor(lineH*s));
+      gap       = Math.floor(gap*s);
+      total     = measureTotal();
+    }
+
+    // Draw background
+    ctx.fillStyle = BG; ctx.fillRect(0,0,W,H);
+
+    // Start Y to vertical center
+    let Y = Math.round((H - total)/2);
+
+    // Title
+    ctx.fillStyle = FG;
+    ctx.font = `900 ${titleSize}px Inter, -apple-system, Segoe UI, Roboto, Arial`;
+    ctx.textBaseline = 'top';
+    ctx.fillText('DAILY PLAN', PAD_L, Y);
+    Y += titleSize + Math.round(W*0.02);
+
+    // Date
+    ctx.fillStyle = MUTED;
+    ctx.font = `500 ${Math.round(W*0.03)}px Inter, -apple-system, Segoe UI, Roboto, Arial`;
+    const dateText = formatCzechDate(new Date(el('dateInput').value));
+    ctx.fillText(dateText, PAD_L, Y);
+    Y += Math.round(W*0.04);
+
+    // Lines (one line: "HH:MM–HH:MM  text")
+    const maxLineWidth = W - PAD_L - PAD_R;
+    ctx.fillStyle = FG;
+    ctx.font = `600 ${lineSize}px Inter, -apple-system, Segoe UI, Roboto, Arial`;
+
+    items.forEach(it=>{
+      const line = `${it.from}–${it.to}  ${it.what}`;
+      const final = ellipsize(ctx, line, maxLineWidth);
+      ctx.fillText(final, PAD_L, Y);
+      Y += lineH;
     });
 
-    // Safe overlay sizes
-    const top = +el('safeTop').value || 0;
-    const bottom = +el('safeBottom').value || 0;
-    el('safeOverlay').style.setProperty('--safe-top', top+'px');
-    el('safeOverlay').style.setProperty('--safe-bottom', bottom+'px');
+    return await new Promise(res => cvs.toBlob(res, 'image/png', 1));
   }
 
+  // Utilities
+  function ellipsize(ctx, text, maxW){
+    if(ctx.measureText(text).width <= maxW) return text;
+    let lo = 0, hi = text.length, mid, fit = '…';
+    while(lo <= hi){
+      mid = (lo+hi)>>1;
+      const test = text.slice(0, mid) + '…';
+      if(ctx.measureText(test).width <= maxW){ fit = test; lo = mid+1; } else hi = mid-1;
+    }
+    return fit;
+  }
+  function getSize(){
+    const v = el('device').value;
+    if(v==='custom'){
+      const w = Math.max(640, +el('w').value||1290);
+      const h = Math.max(1136, +el('h').value||2796);
+      return { w, h };
+    }
+    const [w,h] = v.split('x').map(Number);
+    return { w, h };
+  }
+  function downloadBlob(blob, filename){
+    const a=document.createElement('a');
+    a.href = URL.createObjectURL(blob);
+    a.download = filename;
+    document.body.appendChild(a); a.click();
+    setTimeout(()=>{ URL.revokeObjectURL(a.href); a.remove(); },0);
+  }
   function formatCzechDate(d){
     const WD=['Neděle','Pondělí','Úterý','Středa','Čtvrtek','Pátek','Sobota'][d.getDay()];
     const M=['ledna','února','března','dubna','května','června','července','srpna','září','října','listopadu','prosince'][d.getMonth()];
     return `${WD}, ${d.getDate()}. ${M}`;
   }
-
-  function generateDay(){
-    // Jednoduchý generátor rutiny (mix ranní/pracovní/večerní)
-    const morning = [
-      'Sklenice vody po probuzení','10 min protažení','5 min dýchání','Naplánovat 3 priority dne'
-    ];
-    const work = [
-      'Zkontrolovat inbox (15 min)','Deep work blok (60 min)','Zavolat 1 klientovi','Dokončit 1 úkol s dopadem'
-    ];
-    const evening = [
-      '30 min čtení','Krátký zápis do deníku','Příprava na zítřek','Lehká večeře'
-    ];
-    // Vyber 2-3 z každé skupiny
-    function pick(arr,n){ const a=[...arr]; const out=[]; while(n-- && a.length){ out.push(a.splice(Math.floor(Math.random()*a.length),1)[0]); } return out; }
-    const tasks = [...pick(morning,2), ...pick(work,3), ...pick(evening,2)];
-    return tasks;
-  }
-
-  function downloadBlob(blob, filename){
-    const a = document.createElement('a');
-    a.href = URL.createObjectURL(blob);
-    a.download = filename;
-    document.body.appendChild(a); a.click();
-    setTimeout(()=>{ URL.revokeObjectURL(a.href); a.remove(); }, 0);
-  }
-
-  async function renderToPNG(){
-    const W = +el('w').value || 1290;
-    const H = +el('h').value || 2796;
-    const safeTop = +el('safeTop').value || 0;
-    const safeBottom = +el('safeBottom').value || 0;
-    const theme = document.body.getAttribute('data-theme') || 'light';
-
-    // Canvas
-    const cvs = document.createElement('canvas');
-    cvs.width = W; cvs.height = H;
-    const ctx = cvs.getContext('2d');
-
-    // Colors
-    const BG = theme==='dark' ? '#0b0b0b' : '#ffffff';
-    const FG = theme==='dark' ? '#f6f6f6' : '#0a0a0a';
-    const MUTED = theme==='dark' ? '#a8a8a8' : '#7a7a7a';
-
-    // Fill background
-    ctx.fillStyle = BG; ctx.fillRect(0,0,W,H);
-
-    // Padding
-    const PAD = Math.round(W*0.06); // procentuální padding
-    const X = PAD;
-    let Y = Math.max(PAD, safeTop + Math.round(PAD*0.4));
-    const MAXW = W - PAD*2;
-
-    // Title
-    ctx.fillStyle = FG;
-    ctx.font = `800 ${Math.round(W*0.08)}px -apple-system,Segoe UI,Inter,Roboto,Arial`;
-    ctx.textBaseline = 'top';
-    ctx.fillText(el('titleInput').value || 'TASKS', X, Y);
-    Y += Math.round(W*0.08) + Math.round(W*0.012);
-
-    // Subtitle
-    ctx.fillStyle = MUTED;
-    ctx.font = `400 ${Math.round(W*0.028)}px -apple-system,Segoe UI,Inter,Roboto,Arial`;
-    const subtitle = el('subtitleInput').value || '';
-    if(subtitle){
-      ctx.fillText(subtitle, X, Y);
-      Y += Math.round(W*0.045);
-    } else {
-      Y += Math.round(W*0.02);
-    }
-
-    // Tasks
-    const tasks = (el('tasksInput').value||'').split('\n').map(t=>t.trim()).filter(Boolean);
-    ctx.fillStyle = FG;
-    ctx.lineWidth = Math.max(2, Math.round(W*0.0016));
-    const boxSize = Math.round(W*0.018) + 12;
-    const gap = Math.round(W*0.018) + 10;
-    const lineH = Math.round(W*0.045);
-
-    ctx.font = `500 ${Math.round(W*0.038)}px -apple-system,Segoe UI,Inter,Roboto,Arial`;
-
-    tasks.forEach(t=>{
-      // Box
-      ctx.strokeStyle = FG;
-      ctx.strokeRect(X, Y + 6, boxSize, boxSize);
-      // Text (wrap)
-      const textX = X + boxSize + 12;
-      const wrapped = wrapText(ctx, t, MAXW - boxSize - 12, lineH);
-      wrapped.lines.forEach((ln, i)=>{
-        ctx.fillText(ln, textX, Y + i*lineH);
-      });
-      Y += wrapped.height + gap;
-    });
-
-    // Leave bottom safe area
-    Y = H - safeBottom;
-
-    // Export
-    const blob = await new Promise(res=> cvs.toBlob(res, 'image/png', 1));
-    const filename = `tasks_${(el('dateInput').value||todayISO)}_${W}x${H}.png`;
-    const file = new File([blob], filename, { type:'image/png' });
-    return { blob, file, filename };
-  }
-
-  function wrapText(ctx, text, maxWidth, lineHeight){
-    const words = text.split(' ');
-    const lines = [];
-    let line = '';
-    for (let i=0;i<words.length;i++){
-      const test = line ? line + ' ' + words[i] : words[i];
-      const w = ctx.measureText(test).width;
-      if (w > maxWidth && line){
-        lines.push(line);
-        line = words[i];
-      }else{
-        line = test;
-      }
-    }
-    if(line) lines.push(line);
-    return { lines, height: lines.length*lineHeight };
-  }
-
 })();
 </script>
 </body>
