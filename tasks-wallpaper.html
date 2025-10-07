@@ -1,378 +1,262 @@
 <!DOCTYPE html>
 <html lang="en">
 <head>
-<meta charset="utf-8"/>
-<meta name="viewport" content="width=device-width, initial-scale=1, maximum-scale=1, viewport-fit=cover"/>
-<title>Daily Planner → PNG</title>
-<style>
-  *,*::before,*::after{box-sizing:border-box}
-  :root{
-    --bg:#ffffff; --fg:#0b0b0b; --muted:#8b8f98; --ring:#e9eaee; --card:#f8f9fb;
-    --blue:#2563eb; --blue2:#1e40af; --red:#e11d48;
-  }
-  [data-theme="dark"]{
-    --bg:#0c0d12; --fg:#f3f5f7; --muted:#a0a7b5; --ring:#191b22; --card:#11131a;
-  }
-  html,body{height:100%;margin:0;background:var(--bg);color:var(--fg);
-    font-family: ui-sans-serif,-apple-system,BlinkMacSystemFont,"Segoe UI",Inter,Roboto,Arial}
-  .app{min-height:100%;display:grid;grid-template-rows:auto 1fr auto}
-
-  /* Header */
-  header{
-    position:sticky;top:0;z-index:5;padding:12px 14px calc(8px + env(safe-area-inset-top));
-    display:flex;align-items:center;justify-content:space-between;gap:10px;
-    background:linear-gradient(180deg,rgba(0,0,0,.03),transparent);
-    border-bottom:1px solid var(--ring)
-  }
-  .brand{font-weight:900;letter-spacing:.2px}
-  .chip{font-size:12px;color:var(--muted);padding:6px 10px;border:1px solid var(--ring);border-radius:999px}
-  .row{display:flex;align-items:center;gap:8px;flex-wrap:wrap}
-  select,input[type="number"]{
-    padding:10px;border-radius:10px;border:1px solid var(--ring);background:var(--bg);color:var(--fg)
-  }
-  .hidden{display:none!important}
-
-  /* Main */
-  main{padding:14px;display:grid;gap:12px}
-  .panel{background:var(--card);border:1px solid var(--ring);border-radius:16px;padding:12px;display:grid;gap:12px}
-
-  /* Inputs column */
-  .field{display:grid;gap:6px}
-  .label{font-size:12px;color:var(--muted);font-weight:700}
-  input[type="time"], input[type="text"], input[type="date"]{
-    width:100%;padding:12px;border-radius:12px;border:1px solid var(--ring);background:var(--bg);color:var(--fg);outline:none
-  }
-  .add-btn{
-    width:100%;padding:12px;border-radius:12px;border:1px solid var(--ring);
-    background:var(--bg);color:var(--fg);font-weight:800;cursor:pointer
-  }
-
-  /* List */
-  .list{display:grid;gap:8px}
-  .item{display:grid;grid-template-columns: 120px 1fr auto;gap:10px;align-items:center;
-        background:var(--bg);border:1px solid var(--ring);border-radius:12px;padding:10px}
-  .time{font-weight:900;letter-spacing:.2px}
-  .txt{opacity:.95}
-  .actions{display:flex;gap:6px}
-  .btn{padding:8px 10px;border:1px solid var(--ring);border-radius:10px;background:var(--bg);color:var(--fg);font-weight:700;cursor:pointer}
-
-  /* Footer (sticky, full width, big buttons) */
-  footer{
-    position:sticky;bottom:0;z-index:5;
-    background:var(--bg);
-    border-top:1px solid var(--ring);
-  }
-  .footer-inner{
-    display:grid;grid-template-columns:1fr 1fr;gap:10px;
-    padding:12px 14px calc(12px + env(safe-area-inset-bottom));
-  }
-  .cta{
-    height:56px;border:none;border-radius:14px;font-weight:900;color:#fff;cursor:pointer;
-    font-size:16px;letter-spacing:.2px
-  }
-  .cta.blue{background:var(--blue)}
-  .cta.red{background:var(--red)}
-  .note{padding:8px 14px;color:var(--muted);font-size:12px;text-align:center}
-
-  /* Utilities */
-  @media (min-width: 720px){
-    .inputs-grid{grid-template-columns: 1fr 1fr;gap:12px}
-  }
-</style>
+  <meta charset="utf-8"/>
+  <meta name="viewport" content="width=device-width, initial-scale=1, maximum-scale=1, viewport-fit=cover"/>
+  <title>Daily Planner → PNG</title>
+  <style>
+    *,*::before,*::after{box-sizing:border-box}
+    :root{
+      --bg:#ffffff; --fg:#0b0b0b; --muted:#8b8f98; --ring:#e9eaee; --card:#f8f9fb;
+      --blue:#2563eb; --blue2:#1e40af; --red:#e11d48;
+    }
+    [data-theme="dark"]{
+      --bg:#0c0d12; --fg:#f3f5f7; --muted:#a0a7b5; --ring:#191b22; --card:#11131a;
+    }
+    html,body{height:100%;margin:0;background:var(--bg);color:var(--fg);
+      font-family: ui-sans-serif,-apple-system,BlinkMacSystemFont,"Segoe UI",Inter,Roboto,Arial}
+    .app{min-height:100%;display:grid;grid-template-rows:auto 1fr auto}
+    header{position:sticky;top:0;z-index:5;padding:12px 14px calc(8px + env(safe-area-inset-top));
+      display:flex;align-items:center;justify-content:space-between;gap:10px;
+      background:linear-gradient(180deg,rgba(0,0,0,.03),transparent);border-bottom:1px solid var(--ring)}
+    .brand{font-weight:900;letter-spacing:.2px}
+    .chip{font-size:12px;color:var(--muted);padding:6px 10px;border:1px solid var(--ring);border-radius:999px}
+    .row{display:flex;align-items:center;gap:8px;flex-wrap:wrap}
+    select,input[type="number"]{padding:10px;border-radius:10px;border:1px solid var(--ring);background:var(--bg);color:var(--fg)}
+    .hidden{display:none!important}
+    main{padding:14px;display:grid;gap:12px}
+    .panel{background:var(--card);border:1px solid var(--ring);border-radius:16px;padding:12px;display:grid;gap:12px}
+    .field{display:grid;gap:6px}
+    .label{font-size:12px;color:var(--muted);font-weight:700}
+    input[type="time"], input[type="text"], input[type="date"]{width:100%;padding:12px;border-radius:12px;border:1px solid var(--ring);background:var(--bg);color:var(--fg);outline:none}
+    .add-btn{width:100%;padding:12px;border-radius:12px;border:1px solid var(--ring);background:var(--bg);color:var(--fg);font-weight:800;cursor:pointer}
+    .list{display:grid;gap:8px}
+    .item{display:grid;grid-template-columns: 120px 1fr auto;gap:10px;align-items:center;background:var(--bg);border:1px solid var(--ring);border-radius:12px;padding:10px}
+    .time{font-weight:900;letter-spacing:.2px}
+    .txt{opacity:.95}
+    .actions{display:flex;gap:6px}
+    .btn{padding:8px 10px;border:1px solid var(--ring);border-radius:10px;background:var(--bg);color:var(--fg);font-weight:700;cursor:pointer}
+    footer{position:sticky;bottom:0;z-index:5;background:var(--bg);border-top:1px solid var(--ring);}
+    .footer-inner{display:grid;grid-template-columns:1fr 1fr;gap:10px;padding:12px 14px calc(12px + env(safe-area-inset-bottom));}
+    .cta{height:56px;border:none;border-radius:14px;font-weight:900;color:#fff;cursor:pointer;font-size:16px;letter-spacing:.2px}
+    .cta.blue{background:var(--blue)}
+    .cta.red{background:var(--red)}
+    .note{padding:8px 14px;color:var(--muted);font-size:12px;text-align:center}
+    @media (min-width: 720px){ .inputs-grid{grid-template-columns: 1fr 1fr;gap:12px} }
+  </style>
 </head>
 <body data-theme="light">
-<div class="app">
-  <!-- Header with device selector -->
-  <header>
-    <div class="row">
-      <div class="brand">Daily Planner</div>
-      <div class="chip" id="msg">Ready</div>
-    </div>
-    <div class="row">
-      <label for="device" class="label" style="margin-right:4px">Phone</label>
-      <select id="device">
-        <option value="1290x2796">iPhone 15/14 Pro Max (1290×2796)</option>
-        <option value="1179x2556">iPhone 15/14 Pro (1179×2556)</option>
-        <option value="1284x2778">iPhone 12/13 Pro Max, 14+ (1284×2778)</option>
-        <option value="1170x2532">iPhone 12/13/14/15 (1170×2532)</option>
-        <option value="1080x2340">1080×2340 (general)</option>
-        <option value="custom">Custom…</option>
-      </select>
-      <input id="w" class="hidden" type="number" min="640" step="1" placeholder="Width (px)"/>
-      <input id="h" class="hidden" type="number" min="1136" step="1" placeholder="Height (px)"/>
-      <button class="btn" id="themeBtn">🌓 Theme</button>
-    </div>
-  </header>
-
-  <main>
-    <!-- Inputs stacked vertically -->
-    <section class="panel">
-      <div class="inputs-grid" style="display:grid">
-        <div class="field">
-          <div class="label">From</div>
-          <input type="time" id="from" value="08:00" aria-label="From">
-        </div>
-        <div class="field">
-          <div class="label">Until</div>
-          <input type="time" id="to" value="08:30" aria-label="Until">
-        </div>
-        <div class="field">
-          <div class="label">Plan</div>
-          <input type="text" id="what" maxlength="120" placeholder="e.g., Deep Work, Workout, Client Call…" aria-label="Plan">
-        </div>
-        <button class="add-btn" id="addBtn">Add block</button>
+  <div class="app">
+    <header>
+      <div class="row">
+        <div class="brand">Daily Planner</div>
+        <div class="chip" id="msg">Ready</div>
       </div>
-    </section>
-
-    <!-- Schedule -->
-    <section class="panel">
-      <div class="row" style="justify-content:space-between">
-        <div class="label" style="font-size:13px">Today’s schedule</div>
-        <div class="row">
-          <div class="field" style="min-width:180px">
-            <div class="label">Date</div>
-            <input type="date" id="dateInput">
+      <div class="row">
+        <label for="device" class="label" style="margin-right:4px">Phone</label>
+        <select id="device">
+          <option value="1290x2796">iPhone 15/14 Pro Max (1290×2796)</option>
+          <option value="1179x2556">iPhone 15/14 Pro (1179×2556)</option>
+          <option value="1284x2778">iPhone 12/13 Pro Max, 14+ (1284×2778)</option>
+          <option value="1170x2532">iPhone 12/13/14/15 (1170×2532)</option>
+          <option value="1080x2340">1080×2340 (general)</option>
+          <option value="custom">Custom…</option>
+        </select>
+        <input id="w" class="hidden" type="number" min="640" step="1" placeholder="Width (px)"/>
+        <input id="h" class="hidden" type="number" min="1136" step="1" placeholder="Height (px)"/>
+        <button class="btn" id="themeBtn">🌓 Theme</button>
+      </div>
+    </header>
+    <main>
+      <section class="panel">
+        <div class="field">
+          <div class="label">Title</div>
+          <input type="text" id="title" maxlength="100" placeholder="e.g. Monday Deep Work Schedule" aria-label="Title">
+        </div>
+        <div class="inputs-grid" style="display:grid">
+          <div class="field">
+            <div class="label">From</div>
+            <input type="time" id="from" value="08:00" aria-label="From">
           </div>
-          <button class="btn" id="sortBtn" style="height:44px;align-self:end">Sort</button>
+          <div class="field">
+            <div class="label">Until</div>
+            <input type="time" id="to" value="08:30" aria-label="Until">
+          </div>
+          <div class="field">
+            <div class="label">Plan</div>
+            <input type="text" id="what" maxlength="120" placeholder="e.g., Deep Work, Workout, Client Call…" aria-label="Plan">
+          </div>
+          <button class="add-btn" id="addBtn">Add block</button>
         </div>
+      </section>
+      <section class="panel">
+        <div class="row" style="justify-content:space-between">
+          <div class="label" style="font-size:13px">Today’s schedule</div>
+          <div class="row">
+            <div class="field" style="min-width:180px">
+              <div class="label">Date</div>
+              <input type="date" id="dateInput">
+            </div>
+            <button class="btn" id="sortBtn" style="height:44px;align-self:end">Sort</button>
+          </div>
+        </div>
+        <div class="list" id="list"></div>
+      </section>
+    </main>
+    <footer>
+      <div class="footer-inner">
+        <button class="cta blue" id="exportBtn">Export PNG</button>
+        <button class="cta red" id="clearAllBtn">Delete ALL</button>
       </div>
-      <div class="list" id="list"></div>
-    </section>
-  </main>
-
-  <!-- Sticky footer with big buttons -->
-  <footer>
-    <div class="footer-inner">
-      <button class="cta blue" id="exportBtn">Export PNG</button>
-      <button class="cta red" id="clearAllBtn">Delete ALL</button>
-    </div>
-    <div class="note">Tip: On iPhone, the Export button opens the Share Sheet — tap <b>Save Image</b> to save into Photos.</div>
-  </footer>
-</div>
-
-<script>
-(()=> {
-  const el = id => document.getElementById(id);
-  const msg = t => { el('msg').textContent = t; setTimeout(()=>el('msg').textContent='Ready', 1600); };
-  const pad = n => String(n).padStart(2,'0');
-  const toMin = hhmm => { const [h,m] = hhmm.split(':').map(Number); return h*60+m; };
-
-  let items = []; // {id, from, to, what}
-  let theme = (localStorage.getItem('dp.theme') || 'light');
-  document.body.setAttribute('data-theme', theme);
-
-  // Initialize date input to today
-  el('dateInput').value = new Date().toISOString().slice(0,10);
-
-  // Theme toggle
-  el('themeBtn').addEventListener('click', ()=>{
-    theme = (theme==='dark') ? 'light' : 'dark';
-    document.body.setAttribute('data-theme', theme);
-    localStorage.setItem('dp.theme', theme);
-  });
-
-  // Device select: show custom width/height inputs
-  el('device').addEventListener('change', ()=>{
-    const v = el('device').value;
-    const custom = (v === 'custom');
-    el('w').classList.toggle('hidden', !custom);
-    el('h').classList.toggle('hidden', !custom);
-  });
-
-  // Add block
-  el('addBtn').addEventListener('click', ()=>{
-    const f = el('from').value, t = el('to').value, w = el('what').value.trim();
-    if (!f || !t || !w) {
-      return msg('Fill time & plan');
-    }
-    if (toMin(t) <= toMin(f)) {
-      return msg('“Until” must be later than “From”');
-    }
-    items.push({ id: uid(), from: f, to: t, what: w });
-    sortItems();
-    renderList();
-    el('what').value = '';
-  });
-
-  // Sort button
-  el('sortBtn').addEventListener('click', ()=>{
-    sortItems();
-    renderList();
-  });
-
-  // Clear all
-  el('clearAllBtn').addEventListener('click', ()=>{
-    if (items.length && confirm('Delete the whole schedule?')) {
-      items = [];
-      renderList();
-    }
-  });
-
-  // Export as PNG
-  el('exportBtn').addEventListener('click', async ()=>{
-    if (items.length === 0) return msg('Add at least one block');
-    const { w, h } = getSize();
-    const blob = await renderPNG(w, h);
-    const filename = `daily_${el('dateInput').value}_${w}x${h}.png`;
-    const file = new File([blob], filename, { type: 'image/png' });
-
-    try {
-      if (navigator.canShare && navigator.canShare({ files:[file] })) {
-        await navigator.share({ files:[file], title:'Daily Plan', text:'Daily plan wallpaper' });
-      } else {
-        downloadBlob(blob, filename);
+      <div class="note">Tip: On iPhone, the Export button opens the Share Sheet — tap <b>Save Image</b> to save into Photos.</div>
+    </footer>
+  </div>
+  <script>
+    (() => {
+      const el = id => document.getElementById(id);
+      const msg = t => { el('msg').textContent = t; setTimeout(() => el('msg').textContent = 'Ready', 1600); };
+      const pad = n => String(n).padStart(2, '0');
+      const toMin = hhmm => { const [h, m] = hhmm.split(':').map(Number); return h * 60 + m; };
+      let items = [];
+      let theme = (localStorage.getItem('dp.theme') || 'light');
+      document.body.setAttribute('data-theme', theme);
+      el('dateInput').value = new Date().toISOString().slice(0, 10);
+      el('themeBtn').addEventListener('click', () => {
+        theme = (theme === 'dark') ? 'light' : 'dark';
+        document.body.setAttribute('data-theme', theme);
+        localStorage.setItem('dp.theme', theme);
+      });
+      el('device').addEventListener('change', () => {
+        const v = el('device').value;
+        const custom = (v === 'custom');
+        el('w').classList.toggle('hidden', !custom);
+        el('h').classList.toggle('hidden', !custom);
+      });
+      el('addBtn').addEventListener('click', () => {
+        const f = el('from').value, t = el('to').value, w = el('what').value.trim();
+        if (!f || !t || !w) return msg('Fill time & plan');
+        if (toMin(t) <= toMin(f)) return msg('“Until” must be later than “From”');
+        items.push({ id: uid(), from: f, to: t, what: w });
+        sortItems(); renderList(); el('what').value = '';
+      });
+      el('sortBtn').addEventListener('click', () => { sortItems(); renderList(); });
+      el('clearAllBtn').addEventListener('click', () => { if (confirm('Delete the whole schedule?')) { items = []; renderList(); } });
+      el('exportBtn').addEventListener('click', async () => {
+        if (items.length === 0) return msg('Add at least one block');
+        const { w, h } = getSize();
+        const blob = await renderPNG(w, h);
+        const filename = `daily_${el('dateInput').value}_${w}x${h}.png`;
+        const file = new File([blob], filename, { type: 'image/png' });
+        try {
+          if (navigator.canShare && navigator.canShare({ files: [file] })) {
+            await navigator.share({ files: [file], title: 'Daily Plan', text: 'Daily plan wallpaper' });
+          } else {
+            downloadBlob(blob, filename);
+          }
+          msg('Exported');
+        } catch (e) {
+          console.warn(e);
+          downloadBlob(blob, filename);
+          msg('Downloaded');
+        }
+      });
+      function renderList() {
+        const wrap = el('list'); wrap.innerHTML = '';
+        if (!items.length) {
+          wrap.innerHTML = `<div class="chip" style="border-style:dashed">No blocks yet — add above.</div>`;
+          return;
+        }
+        items.forEach(it => {
+          const row = document.createElement('div'); row.className = 'item';
+          const time = document.createElement('div'); time.className = 'time'; time.textContent = `${it.from}–${it.to}`;
+          const txt = document.createElement('div'); txt.className = 'txt'; txt.textContent = it.what;
+          const actions = document.createElement('div'); actions.className = 'actions';
+          const edit = button('Edit', () => editItem(it.id));
+          const del = button('Delete', () => { items = items.filter(x => x.id !== it.id); renderList(); });
+          actions.append(edit, del);
+          row.append(time, txt, actions); wrap.appendChild(row);
+        });
       }
-      msg('Exported');
-    } catch(e) {
-      console.warn(e);
-      downloadBlob(blob, filename);
-      msg('Downloaded');
-    }
-  });
-
-  // Render list on screen
-  function renderList(){
-    const wrap = el('list');
-    wrap.innerHTML = '';
-    if (!items.length) {
-      wrap.innerHTML = `<div class="chip" style="border-style:dashed">No blocks yet — add above.</div>`;
-      return;
-    }
-    items.forEach(it => {
-      const row = document.createElement('div'); row.className = 'item';
-      const time = document.createElement('div'); time.className = 'time'; time.textContent = `${it.from}–${it.to}`;
-      const txt = document.createElement('div'); txt.className = 'txt'; txt.textContent = it.what;
-      const actions = document.createElement('div'); actions.className = 'actions';
-      const edit = button('Edit', ()=>editItem(it.id));
-      const del = button('Delete', ()=>{ items = items.filter(x => x.id !== it.id); renderList(); });
-      actions.append(edit, del);
-      row.append(time, txt, actions);
-      wrap.appendChild(row);
-    });
-  }
-
-  function button(label, on) {
-    const b = document.createElement('button');
-    b.className = 'btn';
-    b.textContent = label;
-    b.addEventListener('click', on);
-    return b;
-  }
-
-  function editItem(id) {
-    const it = items.find(x => x.id === id);
-    if (!it) return;
-    const f = prompt('From (HH:MM):', it.from);
-    if (!f) return;
-    const t = prompt('Until (HH:MM):', it.to);
-    if (!t) return;
-    const w = prompt('Plan:', it.what);
-    if (!w) return;
-    if (toMin(t) <= toMin(f)) {
-      return msg('“Until” must be later than “From”');
-    }
-    it.from = f;
-    it.to = t;
-    it.what = w.trim();
-    sortItems();
-    renderList();
-  }
-
-  function sortItems(){
-    items.sort((a, b) => {
-      const da = toMin(a.from), db = toMin(b.from);
-      if (da !== db) return da - db;
-      return toMin(a.to) - toMin(b.to);
-    });
-  }
-
-  function uid(){
-    return Math.random().toString(36).slice(2,9);
-  }
-
-  function getSize(){
-    const dv = el('device').value;
-    if (dv === 'custom') {
-      const w = parseInt(el('w').value, 10);
-      const h = parseInt(el('h').value, 10);
-      return { w: w || 1080, h: h || 2340 };
-    } else {
-      const [ww, hh] = dv.split('x').map(Number);
-      return { w: ww, h: hh };
-    }
-  }
-
-  function downloadBlob(blob, filename){
-    const a = document.createElement('a');
-    a.href = URL.createObjectURL(blob);
-    a.download = filename;
-    document.body.appendChild(a);
-    a.click();
-    document.body.removeChild(a);
-  }
-
-  async function renderPNG(W, H){
-    const cvs = document.createElement('canvas');
-    cvs.width = W;
-    cvs.height = H;
-    const ctx = cvs.getContext('2d');
-
-    const BG = (theme === 'dark') ? '#0c0d12' : '#ffffff';
-    const FG = (theme === 'dark') ? '#f3f5f7' : '#0b0b0b';
-    const MUTED = (theme === 'dark') ? '#a0a7b5' : '#8b8f98';
-    const CARD = (theme === 'dark') ? '#11131a' : '#f8f9fb';
-    const RING = (theme === 'dark') ? '#191b22' : '#e9eaee';
-
-    // Fill background
-    ctx.fillStyle = BG;
-    ctx.fillRect(0, 0, W, H);
-
-    // Some margins
-    const margin = 60;
-    const contentWidth = W - margin * 2;
-    const yStart = margin;
-
-    // Title: date
-    ctx.fillStyle = FG;
-    ctx.font = 'bold 48px sans-serif';
-    ctx.textAlign = 'center';
-    const dateStr = el('dateInput').value;
-    ctx.fillText(dateStr, W / 2, yStart + 48);
-
-    // Draw each block
-    const totalMin = 24 * 60;
-    const usableHeight = H - yStart - margin;
-    items.forEach(it => {
-      const fromMin = toMin(it.from);
-      const toMin_ = toMin(it.to);
-      const y0 = yStart + (fromMin / totalMin) * usableHeight;
-      const y1 = yStart + (toMin_ / totalMin) * usableHeight;
-      const blockHeight = Math.max(24, y1 - y0);
-
-      // Block background
-      ctx.fillStyle = CARD;
-      ctx.strokeStyle = RING;
-      const x0 = margin;
-      const x1 = W - margin;
-      ctx.fillRect(x0, y0, contentWidth, blockHeight);
-      ctx.strokeRect(x0, y0, contentWidth, blockHeight);
-
-      // Text inside block
-      ctx.fillStyle = FG;
-      ctx.textAlign = 'left';
-      ctx.font = '24px sans-serif';
-      const textX = x0 + 20;
-      const textY = y0 + 36;
-      ctx.fillText(`${it.from}–${it.to}`, textX, textY);
-      ctx.fillText(it.what, textX, textY + 30);
-    });
-
-    return new Promise(resolve => {
-      cvs.toBlob(blob => resolve(blob), 'image/png');
-    });
-  }
-
-  // Initial render
-  renderList();
-})();
-</script>
+      function button(label, on) { const b = document.createElement('button'); b.className = 'btn'; b.textContent = label; b.addEventListener('click', on); return b; }
+      function editItem(id) {
+        const it = items.find(x => x.id === id); if (!it) return;
+        const f = prompt('From (HH:MM):', it.from); if (!f) return;
+        const t = prompt('Until (HH:MM):', it.to); if (!t) return;
+        const w = prompt('Plan:', it.what); if (!w) return;
+        if (toMin(t) <= toMin(f)) return msg('“Until” must be later than “From”');
+        it.from = f; it.to = t; it.what = w.trim(); sortItems(); renderList();
+      }
+      function sortItems() { items.sort((a, b) => toMin(a.from) - toMin(b.from) || toMin(a.to) - toMin(b.to)); }
+      function uid() { return Math.random().toString(36).slice(2, 9); }
+      function getSize() {
+        const dv = el('device').value;
+        if (dv === 'custom') {
+          const w = parseInt(el('w').value, 10);
+          const h = parseInt(el('h').value, 10);
+          return { w: w || 1080, h: h || 2340 };
+        } else {
+          const [ww, hh] = dv.split('x').map(Number);
+          return { w: ww, h: hh };
+        }
+      }
+      function downloadBlob(blob, filename) {
+        const a = document.createElement('a');
+        a.href = URL.createObjectURL(blob);
+        a.download = filename;
+        document.body.appendChild(a);
+        a.click();
+        document.body.removeChild(a);
+      }
+      async function renderPNG(W, H) {
+        const cvs = document.createElement('canvas'); cvs.width = W; cvs.height = H;
+        const ctx = cvs.getContext('2d');
+        const BG = (theme === 'dark') ? '#0c0d12' : '#ffffff';
+        const FG = (theme === 'dark') ? '#f3f5f7' : '#0b0b0b';
+        const MUTED = (theme === 'dark') ? '#a0a7b5' : '#8b8f98';
+        const CARD = (theme === 'dark') ? '#11131a' : '#f8f9fb';
+        const RING = (theme === 'dark') ? '#191b22' : '#e9eaee';
+        ctx.fillStyle = BG;
+        ctx.fillRect(0, 0, W, H);
+        const margin = 60;
+        const contentWidth = W - margin * 2;
+        const yStart = margin + 100;
+        const title = el('title').value.trim() || 'Daily Plan';
+        const dateStr = el('dateInput').value;
+        ctx.fillStyle = FG;
+        ctx.font = 'bold 54px sans-serif';
+        ctx.textAlign = 'center';
+        ctx.fillText(title, W / 2, margin + 54);
+        ctx.font = '24px sans-serif';
+        ctx.fillStyle = MUTED;
+        ctx.fillText(dateStr, W / 2, margin + 90);
+        const totalMin = 24 * 60;
+        const usableHeight = H - yStart - margin;
+        items.forEach(it => {
+          const fromMin = toMin(it.from), toMin_ = toMin(it.to);
+          const y0 = yStart + (fromMin / totalMin) * usableHeight;
+          const y1 = yStart + (toMin_ / totalMin) * usableHeight;
+          const blockHeight = Math.max(24, y1 - y0);
+          const x0 = margin, textX = x0 + 20;
+          ctx.fillStyle = CARD;
+          ctx.strokeStyle = RING;
+          ctx.lineWidth = 2;
+          ctx.beginPath();
+          ctx.roundRect?.(x0, y0, contentWidth, blockHeight, 16) || ctx.rect(x0, y0, contentWidth, blockHeight);
+          ctx.fill();
+          ctx.stroke();
+          ctx.fillStyle = FG;e
+          ctx.textAlign = 'left';
+          ctx.font = 'bold 26px sans-serif';
+          ctx.fillText(`${it.from} – ${it.to}`, textX, y0 + 34);
+          ctx.font = '24px sans-serif';
+          ctx.fillText(it.what, textX, y0 + 64);
+        });
+        return new Promise(resolve => {
+          cvs.toBlob(blob => resolve(blob), 'image/png');
+        });
+      }
+      renderList();
+    })();
+  </script>e
+</body>
+</html>
